@@ -24,6 +24,15 @@ abstract class UnitTestCase extends BaseTestCase
         $user = getenv('DB_USER') ?: 'devapppro';
         $pass = getenv('DB_PASS') ?: 'devapppro_secret';
 
+        // Pojistka: testy NIKDY nesmí běžet proti produkční databázi.
+        // Testy mažou a znovuvytvářejí schema — povolena je jen DB s příponou _test.
+        if (!str_ends_with($dbname, '_test')) {
+            throw new \RuntimeException(
+                "Testy vyžadují testovací databázi (název musí končit '_test'), dostal: {$dbname}. "
+                . 'Zkontrolujte phpunit.xml (DB_NAME) nebo env proměnnou DB_NAME.'
+            );
+        }
+
         $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
         $this->pdo = new \PDO($dsn, $user, $pass, [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
