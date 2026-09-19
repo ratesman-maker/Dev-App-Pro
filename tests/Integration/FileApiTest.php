@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Files API (přes HTTP).
+  * @group files
  */
 class FileApiTest extends TestCase
 {

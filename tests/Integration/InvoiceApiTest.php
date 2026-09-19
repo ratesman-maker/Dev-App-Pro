@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Invoices API (přes HTTP).
+  * @group invoices
  */
 class InvoiceApiTest extends TestCase
 {
@@ -40,6 +41,9 @@ class InvoiceApiTest extends TestCase
 
     /**
      * POST vytvoření faktury → 201, vat_amount_cents=21000, amount_cents=121000.
+     */
+    /**
+     * @group smoke
      */
     public function test_vytvoreni_faktury(): void
     {

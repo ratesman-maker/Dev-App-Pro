@@ -3,14 +3,15 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
-use DevAppPro\Tests\TestCase;
+use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\TaskRepository;
 use DevAppPro\Repositories\ProjectRepository;
 
 /**
  * Unit testy pro TaskRepository (přímo nad DB přes TestCase).
+  * @group tasks
  */
-class TaskRepositoryTest extends TestCase
+class TaskRepositoryTest extends UnitTestCase
 {
     private TaskRepository $repo;
     private ProjectRepository $projects;

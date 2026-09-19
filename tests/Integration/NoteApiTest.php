@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Notes API (přes HTTP).
+  * @group notes
  */
 class NoteApiTest extends TestCase
 {
@@ -59,6 +60,9 @@ class NoteApiTest extends TestCase
 
     /**
      * Login, POST {content:"Test"} → 201.
+     */
+    /**
+     * @group smoke
      */
     public function test_vytvoreni_poznamky(): void
     {

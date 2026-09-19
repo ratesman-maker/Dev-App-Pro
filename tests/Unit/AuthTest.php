@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use DevAppPro\Tests\UnitTestCase;
 
 /**
  * Unit testy pro hesla (bcrypt).
+  * @group auth
  */
-class AuthTest extends TestCase
+class AuthTest extends UnitTestCase
 {
     /**
      * Test: password_hash generuje bcrypt hash s cost 12.

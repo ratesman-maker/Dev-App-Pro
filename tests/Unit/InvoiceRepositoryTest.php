@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
-use DevAppPro\Tests\TestCase;
+use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\InvoiceRepository;
 use DevAppPro\Repositories\InvoicePaymentRepository;
 use DevAppPro\Repositories\ClientRepository;
@@ -11,8 +11,9 @@ use DevAppPro\Repositories\ProjectRepository;
 
 /**
  * Unit testy pro InvoiceRepository (přímo nad DB přes TestCase).
+  * @group invoices
  */
-class InvoiceRepositoryTest extends TestCase
+class InvoiceRepositoryTest extends UnitTestCase
 {
     private InvoiceRepository $repo;
     private InvoicePaymentRepository $payments;

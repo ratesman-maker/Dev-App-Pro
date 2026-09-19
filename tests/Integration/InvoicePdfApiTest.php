@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro PDF generování faktur (přes HTTP).
+  * @group invoices
  */
 class InvoicePdfApiTest extends TestCase
 {

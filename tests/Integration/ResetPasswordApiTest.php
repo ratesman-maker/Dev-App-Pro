@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro reset hesla API.
+  * @group auth
  */
 class ResetPasswordApiTest extends TestCase
 {

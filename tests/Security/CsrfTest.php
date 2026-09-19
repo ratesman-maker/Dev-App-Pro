@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Bezpečnostní testy pro CSRF ochranu.
+  * @group security
  */
 class CsrfTest extends TestCase
 {

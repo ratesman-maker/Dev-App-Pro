@@ -3,14 +3,15 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
-use DevAppPro\Tests\TestCase;
+use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\NoteRepository;
 use DevAppPro\Repositories\ClientRepository;
 
 /**
  * Unit testy pro NoteRepository (přímo nad DB přes TestCase).
+  * @group notes
  */
-class NoteRepositoryTest extends TestCase
+class NoteRepositoryTest extends UnitTestCase
 {
     private NoteRepository $repo;
     private ClientRepository $clients;

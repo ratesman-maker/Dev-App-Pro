@@ -3,17 +3,15 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests;
 
-use PHPUnit\Framework\TestCase as BaseTestCase;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 
 /**
- * Základní třída pro všechny testy.
- * Spouští PHP built-in server a poskytuje Guzzle klienta s cookies.
+ * Základní třída pro HTTP/API testy (Integration, Security).
+ * Rozšiřuje UnitTestCase (test DB) o PHP built-in server a Guzzle klienta s cookies.
  */
-abstract class TestCase extends BaseTestCase
+abstract class TestCase extends UnitTestCase
 {
-    protected \PDO $pdo;
     protected Client $http;
     protected CookieJar $cookies;
     protected string $serverPid;
@@ -23,28 +21,12 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // 1. Připojení k test DB
+        // Spuštění PHP built-in serveru
         $host = getenv('DB_HOST') ?: '127.0.0.1';
         $dbname = getenv('DB_NAME') ?: 'devapppro_test';
         $user = getenv('DB_USER') ?: 'devapppro';
         $pass = getenv('DB_PASS') ?: 'devapppro_secret';
 
-        $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
-        $this->pdo = new \PDO($dsn, $user, $pass, [
-            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            \PDO::ATTR_EMULATE_PREPARES => false,
-        ]);
-
-        // 2. Načtení schema.sql (DROP + CREATE)
-        $schema = file_get_contents(__DIR__ . '/../database/schema.sql');
-        $this->pdo->exec($schema);
-
-        // 3. Načtení seed_test.sql
-        $seed = file_get_contents(__DIR__ . '/../database/seed_test.sql');
-        $this->pdo->exec($seed);
-
-        // 4. Spuštění PHP built-in serveru
         $this->cookies = new CookieJar();
         $projectRoot = dirname(__DIR__);
         $router = escapeshellarg($projectRoot . '/tests/test-router.php');
@@ -79,20 +61,12 @@ abstract class TestCase extends BaseTestCase
 
     protected function tearDown(): void
     {
-        // 1. Zastavení PHP serveru
+        // Zastavení PHP serveru (tabulky uklidí UnitTestCase::tearDown)
         if (!empty($this->serverPid)) {
             shell_exec("kill {$this->serverPid} 2>/dev/null");
             // Počkat na uvolnění portu
             usleep(200000); // 200ms
         }
-
-        // 2. Drop all tables
-        $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
-        $tables = $this->pdo->query('SHOW TABLES')->fetchAll(\PDO::FETCH_COLUMN);
-        foreach ($tables as $table) {
-            $this->pdo->exec("DROP TABLE IF EXISTS `{$table}`");
-        }
-        $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
 
         parent::tearDown();
     }

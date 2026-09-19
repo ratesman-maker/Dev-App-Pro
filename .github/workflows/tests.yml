@@ -1,0 +1,106 @@
+name: Testy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: devapppro_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, mbstring, gd, bcmath
+          coverage: none
+
+      - name: Instalace mariadb-client
+        run: sudo apt-get update && sudo apt-get install -y mariadb-client
+
+      - name: Vytvořit DB uživatele
+        run: |
+          mysql -h127.0.0.1 -uroot -proot -e "CREATE USER IF NOT EXISTS 'devapppro'@'%' IDENTIFIED BY 'devapppro_secret'; GRANT ALL PRIVILEGES ON devapppro_test.* TO 'devapppro'@'%'; FLUSH PRIVILEGES;"
+
+      # config/config.php a config/database.php jsou v .gitignore (tajemství),
+      # proto se v CI vytvoří minimální verze.
+      - name: Konfigurace pro CI
+        run: |
+          mkdir -p config
+          cat > config/config.php << 'CONFEOF'
+          <?php
+          declare(strict_types=1);
+          define('APP_NAME', 'Dev App Pro');
+          define('APP_VERSION', '1.0.0');
+          define('APP_ENV', 'testing');
+          define('APP_DEBUG', false);
+          date_default_timezone_set('Europe/Prague');
+          define('BACKUP_DIR', '/tmp/backups');
+          define('BACKUP_RETENTION_DAYS', 30);
+          define('RATE_LIMIT_MAX_ATTEMPTS', 5);
+          define('RATE_LIMIT_WINDOW_HOURS', 1);
+          define('PASSWORD_MIN_LENGTH', 8);
+          define('BCRYPT_COST', 12);
+          define('PROJECTS_WATCH_DIR', '/tmp/projekty');
+          define('BACKUPS_DIR', '/tmp/zalohy');
+          define('PDF_LIB', 'mpdf');
+          define('WP_INSTALL_BASE', '/tmp/projekty');
+          define('WP_DOWNLOAD_URL', 'https://wordpress.org/latest.tar.gz');
+          define('WP_INSTALL_SCRIPT', __DIR__ . '/../cli/install-wordpress.php');
+          define('WP_DB_HOST', '127.0.0.1');
+          define('WP_DB_PREFIX', 'wp_');
+          $wpSecret = getenv('DEVAPPPRO_WP_AUTOLOGIN_SECRET');
+          if ($wpSecret === false || $wpSecret === '') {
+              if (PHP_SAPI !== 'cli') { http_response_code(500); exit(1); }
+              $wpSecret = 'ci_secret';
+          }
+          define('WP_AUTOLOGIN_SECRET', $wpSecret);
+          $credKey = getenv('DEVAPPPRO_CREDENTIALS_ENCRYPTION_KEY');
+          if ($credKey === false || $credKey === '') {
+              if (PHP_SAPI !== 'cli') { http_response_code(500); exit(1); }
+              $credKey = 'ci_secret';
+          }
+          define('CREDENTIALS_ENCRYPTION_KEY', $credKey);
+          CONFEOF
+          cat > config/database.php << 'DBEOF'
+          <?php
+          declare(strict_types=1);
+          return [
+              'host'     => getenv('DB_HOST') ?: '127.0.0.1',
+              'port'     => 3306,
+              'dbname'   => getenv('DB_NAME') ?: 'devapppro_test',
+              'username' => getenv('DB_USER') ?: 'devapppro',
+              'password' => getenv('DB_PASS') ?: 'devapppro_secret',
+              'charset'  => 'utf8mb4',
+              'options'  => [
+                  PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                  PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                  PDO::ATTR_EMULATE_PREPARES => false,
+              ],
+          ];
+          DBEOF
+
+      - name: Composer install
+        run: composer install --no-progress --no-interaction
+
+      - name: Spustit testy (full)
+        run: |
+          export DB_HOST=127.0.0.1 DB_NAME=devapppro_test DB_USER=devapppro DB_PASS=devapppro_secret
+          bin/test.sh full

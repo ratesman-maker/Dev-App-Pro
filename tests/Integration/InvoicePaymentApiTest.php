@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Invoice Payments API (přes HTTP).
+  * @group invoices
  */
 class InvoicePaymentApiTest extends TestCase
 {

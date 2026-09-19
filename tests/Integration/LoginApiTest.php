@@ -7,11 +7,15 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro login API.
+  * @group auth
  */
 class LoginApiTest extends TestCase
 {
     /**
      * Úspěšné přihlášení s admin/test123 → 200, user data.
+     */
+    /**
+     * @group smoke
      */
     public function test_uspesne_prihlaseni(): void
     {

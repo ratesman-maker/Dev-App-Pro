@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Bezpečnostní testy pro autorizaci.
+  * @group security
  */
 class AuthorizationTest extends TestCase
 {
@@ -22,6 +23,9 @@ class AuthorizationTest extends TestCase
     /**
      * Veřejné endpointy nevyžadují přihlášení (nevrátí 401).
      * POST /api/auth/login, POST /api/auth/password-hint, POST /api/auth/reset-password.
+     */
+    /**
+     * @group smoke
      */
     public function test_public_endpointy_nevyaduji_prihlaseni(): void
     {

@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Tasks API (přes HTTP).
+  * @group tasks
  */
 class TaskApiTest extends TestCase
 {

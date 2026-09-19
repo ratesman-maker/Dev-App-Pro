@@ -127,10 +127,13 @@
 - Po každé migraci DB aktualizovat schema.sql, po každé funkci README.md (je-li relevantní)
 
 ## Testy
-- Spuštění: `cd /var/www/devapppro && ./vendor/bin/phpunit`
-- Test DB se resetuje před každým testem (setUp/tearDown)
-- Test server: PHP built-in server na portu 8080 (tests/test-router.php)
+- Spouštění přes profily: `bin/test.sh <profil>` (viz níže), případně přímo `vendor/bin/phpunit`
+- Profily: `smoke` (8 kritických testů, ~10 s) · `unit` (bez HTTP serveru) · `integration [modul]` · `security` · `full` (před push)
+- Skupiny modulů (`--group`): auth, clients, projects, tasks, invoices, finance, notes, files, settings, dashboard, security + `smoke`
+- Base třídy: `UnitTestCase` (test DB bez serveru — repositáře, služby) vs `TestCase` (DB + PHP built-in server na 8080 + Guzzle klient)
+- Test DB se resetuje před každým testem (setUp/tearDown), test server: tests/test-router.php
 - Produkční aplikace: Apache na 127.0.0.1:80
+- CI: GitHub Actions `.github/workflows/tests.yml` (mariadb service, config se v CI generuje, protože config/*.php jsou gitignored)
 - POZOR: bootstrap error handler převádí i @-potlačená varování na ErrorException → TestCase::waitForServer musí fsockopen obalit try/catch (opraveno)
 - TestCase předává serveru i DEVAPPPRO_WP_AUTOLOGIN_SECRET / DEVAPPPRO_CREDENTIALS_ENCRYPTION_KEY (test dummy hodnoty)
 - schema.sql MUSÍ odpovídat live DB (drop+create celé DB, testy na tom stojí); po migracích vždy doplnit nové tabulky/sloupce
