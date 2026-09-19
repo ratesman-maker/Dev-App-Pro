@@ -289,7 +289,35 @@ bin/test.sh full                 # kompletní sada — před push
 - **Base třídy** — `UnitTestCase` (test DB bez serveru) vs `TestCase` (DB + PHP built-in server na 8080)
 - Test DB se resetuje před každým testem (`devapppro_test`, schema.sql + seed_test.sql)
 - **CI** — GitHub Actions (`.github/workflows/tests.yml`): MariaDB service + `bin/test.sh full` při pushi na main / PR
+- **Bezpečnost testů** — testy běží výhradně na `devapppro_test`; pojistka (UnitTestCase + test-router) odmítne spustit testy proti jiné než `_test` databázi
 - 220+ testů: Unit + Integration (API přes HTTP) + Security
+
+## Vývoj
+
+### Pravidla (zkráceně — kompletní v AGENTS.md)
+
+**Databáze**
+- Změna DB = migrační soubor `database/migration_XXX.sql` + ihned synchronizovat `schema.sql` (testy na něm stojí)
+- Migrace idempotentní, `schema.sql` je zdroj pravdy (porovnávat s live DB)
+
+**Backend**
+- Validace v kontrolerech (422), částky počítat na serveru, PDO prepared statements
+- Po změně: `php -l` + `bin/test.sh smoke` + `bin/test.sh integration <modul>`
+
+**Frontend**
+- Po změně: `tsc` + `npm run build` + vizuální kontrola (build se ztrácí v cache prohlížeče)
+- Bez stínů a inline stylů (CSP), UI ve stylu shadcn, texty česky
+
+**Testy**
+- Nová funkce = nové testy s `@group` modulu, před push `bin/test.sh full`
+
+**Git**
+- Feature větve (`feat/`, `fix/`, `docs/`) → merge do main po dokončení
+- Commity česky „co a proč", žádný force-push, `pull` před merge
+- Repo je soukromé; tajemství (`config/*.php`, `.env`) se necommitují
+
+**Proces**
+- Komunikace česky, ověřovat reálné chování (ne jen syntax), záloha před systémovými změnami
 
 ---
 

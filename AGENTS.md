@@ -114,10 +114,34 @@
 - Položky se zobrazují v InvoiceDetailModal
 - PDF endpoint: GET /api/invoices/{id}/pdf (frontend volá bez .php, Apache rewrite zachovává REQUEST_URI)
 
-## GitHub pravidla (dohodnuto 19. 9. 2026)
+## Vývojová pravidla (dohodnuto 19. 9. 2026, odsouhlaseno uživatelem)
+
+### Databáze
+- **Každá změna DB = migrační soubor** `database/migration_XXX.sql` + **ihned synchronizovat `schema.sql`** (testy na něm stojí — schema.sql se už dvakrát rozjelo od live DB a lámalo testy)
+- Migrace idempotentní, aplikovat na live DB vzápětí
+- `schema.sql` = zdroj pravdy — po každé migraci porovnat s live DB (information_schema)
+
+### Backend
+- Validace vždy v kontroleru (422), **nikdy nevěřit frontendu** — částky a součty počítat na serveru
+- PDO prepared statements + whitelisty sloupců (stávající standard udržet)
+- Po každé backend změně: `php -l` + `bin/test.sh smoke` + `bin/test.sh integration <modul>`
+- Pozor na bootstrap error handler (převádí i `@`-potlačená varování na výjimky) — žádné `@` volání bez try/catch
+
+### Frontend
+- Po každé frontend změně: `tsc` + `npm run build` **+ vizuální kontrola v prohlížeči** (build se ztrácí v cache prohlížeče)
+- **Bez stínů, bez inline stylů** (CSP `style-src 'self'`), barvy grafů přes CSS třídy (`.chart-finance`)
+- Nové UI ve stylu shadcn, reuse DataTable/dialogy, texty česky
+- UI změny kontrolovat náhledem (browser preview)
+
+### Testy
+- Nová funkce = **nové testy** (integration + unit), modul označit `@group`
+- Před commit/push: `bin/test.sh full`
+- Testy jen na `_test` DB (pojistka: UnitTestCase + test-router odmítnou produkci)
+
+### Git/GitHub
 - Repo: https://github.com/ratesman-maker/Dev-App-Pro (soukromé, větev main)
 - Identita commitů: Miroslav Bartík <jajsem@miroslavbartik.cz> (přes `git -c user.name=... -c user.email=...` nebo env proměnné, NEměnit git config)
-- **Větvení**: feature větve — každá změna ve větvi `feat/<nazev>` / `fix/<nazev>`; po dokončení merge do main (`git merge --no-ff`), pak push
+- **Větvení**: feature větve — každá změna ve větvi `feat/<nazev>` / `fix/<nazev>` / `docs/<nazev>`; po dokončení merge do main (`git merge --no-ff`), pak push
 - **Frekvence**: commitovat průběžně po logických celcích, **push po milníku nebo na vyžádání uživatele**
 - **Commit zprávy**: česky, stručně "co a proč", BEZ Devin footeru (žádné "Generated with Devin" ani "Co-Authored-By")
 - **Nikdy force-push** (historie se nepřepisuje), nikdy nemazat větve bez vědomí uživatele
@@ -125,6 +149,9 @@
 - **Necommituje se**: `.env`, `config/*.php`, `storage/`, logy, vendor/node_modules/dist (hlídá .gitignore), WordPress weby v /run/media/ratesman/Projekty (jsou mimo repo)
 - Credentials: token v ~/.git-credentials (600), push přes `git -c credential.helper=store push`
 - Po každé migraci DB aktualizovat schema.sql, po každé funkci README.md (je-li relevantní)
+
+### Proces
+- Komunikace česky, ověřovat reálné chování (ne jen `php -l`), záloha před systémovými změnami
 
 ## Testy
 - Spouštění přes profily: `bin/test.sh <profil>` (viz níže), případně přímo `vendor/bin/phpunit`
