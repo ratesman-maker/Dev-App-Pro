@@ -119,7 +119,7 @@
 - Identita commitů: Miroslav Bartík <jajsem@miroslavbartik.cz> (přes `git -c user.name=... -c user.email=...` nebo env proměnné, NEměnit git config)
 - **Větvení**: feature větve — každá změna ve větvi `feat/<nazev>` / `fix/<nazev>`; po dokončení merge do main (`git merge --no-ff`), pak push
 - **Frekvence**: commitovat průběžně po logických celcích, **push po milníku nebo na vyžádání uživatele**
-- **Commit zprávy**: česky, stručně "co a proč", zachovat Devin footer (Generated with Devin + Co-Authored-By)
+- **Commit zprávy**: česky, stručně "co a proč", BEZ Devin footeru (žádné "Generated with Devin" ani "Co-Authored-By")
 - **Nikdy force-push** (historie se nepřepisuje), nikdy nemazat větve bez vědomí uživatele
 - Před merge/pushem vždy `git pull` (vyhnout se konfliktům); pull s rebase jen když je to bezpečné
 - **Necommituje se**: `.env`, `config/*.php`, `storage/`, logy, vendor/node_modules/dist (hlídá .gitignore), WordPress weby v /run/media/ratesman/Projekty (jsou mimo repo)
