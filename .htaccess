@@ -1,0 +1,84 @@
+RewriteEngine On
+
+# Blokovat path traversal - jakákoliv URL obsahující ..
+RewriteCond %{REQUEST_URI} \.\. [NC]
+RewriteRule .* - [F,L]
+
+# Blokovat přístup k citlivým složkám a souborům (musí být před SPA fallback)
+RewriteRule ^config/ - [F,L]
+RewriteRule ^src/ - [F,L]
+RewriteRule ^vendor/ - [F,L]
+RewriteRule ^cli/ - [F,L]
+RewriteRule ^frontend/src/ - [F,L]
+RewriteRule ^docs/ - [F,L]
+RewriteRule ^\.devin/ - [F,L]
+RewriteRule ^\.env$ - [F,L]
+RewriteRule ^\.gitignore$ - [F,L]
+RewriteRule ^AGENTS\.md$ - [F,L]
+RewriteRule ^README\.md$ - [F,L]
+RewriteRule ^composer\.(json|lock)$ - [F,L]
+RewriteRule ^composer\.phar$ - [F,L]
+RewriteRule ^phpunit\.(xml|xml\.dist)$ - [F,L]
+RewriteRule ^frontend/package\.json$ - [F,L]
+RewriteRule ^frontend/vite\.config\..*$ - [F,L]
+RewriteRule ^frontend/tsconfig\..*$ - [F,L]
+
+# API endpointy - /api/{name} → api/{name}.php (včetně víceúrovňových cest)
+# Speciální routa: /api/projects/{id}/credentials → api/project-credentials.php
+RewriteRule ^api/projects/[0-9]+/credentials/?$ api/project-credentials.php [L,QSA]
+RewriteRule ^api/([a-z-]+)/(.*)$ api/$1.php [L,QSA]
+RewriteRule ^api/([a-z-]+)/?$ api/$1.php [L,QSA]
+
+# SPA statické soubory - JS/CSS/fonty (build jde do assets/dist/, ale Vite generuje assets/ podsložku)
+RewriteCond %{REQUEST_URI} ^/assets/
+RewriteCond %{REQUEST_URI} !^/assets/dist/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^assets/(.*)$ assets/dist/assets/$1 [L]
+
+# Fonty (frontend/public/fonts/)
+RewriteCond %{REQUEST_URI} ^/fonts/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^fonts/(.*)$ frontend/public/fonts/$1 [L]
+
+# SPA fallback - všechny ostatní cesty na assets/dist/index.html
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteCond %{REQUEST_URI} !^/assets/dist/
+RewriteCond %{REQUEST_URI} !\.(js|css|woff2|png|jpg|jpeg|gif|svg|ico|webp)$
+RewriteRule ^ assets/dist/index.html [L]
+
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'self'"
+
+# CORS pro API endpointy (jen stejného originu - bez externích domén)
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "https://localhost" env=API_CORS
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS" env=API_CORS
+    Header always set Access-Control-Allow-Headers "Content-Type, X-CSRF-Token" env=API_CORS
+    Header always set Access-Control-Allow-Credentials "true" env=API_CORS
+</IfModule>
+
+# Označit API požadavky pro CORS hlavičky
+SetEnvIf Request_URI "^/api/" API_CORS
+
+# Odpověď na CORS preflight (OPTIONS)
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^ - [R=204,L]
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE application/json text/html text/css application/javascript
+</IfModule>
+
+<FilesMatch "\.(js|css|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+<FilesMatch "^(config|database)\.php$">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes

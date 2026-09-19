@@ -1,0 +1,38 @@
+# Konfigurace s tajemstvími (DB hesla, šifrovací klíče)
+config/config.php
+config/database.php
+
+# Závislosti
+vendor/
+frontend/node_modules/
+
+# Build artefakty
+assets/dist/
+frontend/dist/
+
+# Storage (nahrané soubory)
+storage/
+
+# Logy
+*.log
+/var/log/devapppro/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Dočasné soubory
+/tmp/
+*.tmp
+*.bak
+*.bak.*
+.env
+
+# Lokální artefakty
+.backup-path
+.phpunit.cache/
