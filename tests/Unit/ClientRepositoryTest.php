@@ -3,13 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
-use DevAppPro\Tests\TestCase;
+use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\ClientRepository;
 
 /**
  * Unit testy pro ClientRepository (přímo nad DB přes TestCase).
+  * @group clients
  */
-class ClientRepositoryTest extends TestCase
+class ClientRepositoryTest extends UnitTestCase
 {
     private ClientRepository $repo;
 

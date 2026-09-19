@@ -3,15 +3,16 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
-use DevAppPro\Tests\TestCase;
+use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\TransactionRepository;
 use DevAppPro\Repositories\ClientRepository;
 use DevAppPro\Repositories\ProjectRepository;
 
 /**
  * Unit testy pro TransactionRepository (přímo nad DB přes TestCase).
+  * @group finance
  */
-class TransactionRepositoryTest extends TestCase
+class TransactionRepositoryTest extends UnitTestCase
 {
     private TransactionRepository $repo;
     private ClientRepository $clients;

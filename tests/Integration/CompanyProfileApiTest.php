@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Company Profile API.
+  * @group settings
  */
 class CompanyProfileApiTest extends TestCase
 {

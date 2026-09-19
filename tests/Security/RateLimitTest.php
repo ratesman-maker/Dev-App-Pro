@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Bezpečnostní testy pro rate limiting.
+  * @group security
  */
 class RateLimitTest extends TestCase
 {

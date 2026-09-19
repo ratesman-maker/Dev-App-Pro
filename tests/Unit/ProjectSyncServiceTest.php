@@ -3,15 +3,16 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
-use DevAppPro\Tests\TestCase;
+use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Services\ProjectSyncService;
 use DevAppPro\Repositories\ProjectRepository;
 
 /**
  * Unit testy pro ProjectSyncService.
  * Používá dočasný adresář pro simulaci PROJECTS_WATCH_DIR.
+  * @group projects
  */
-class ProjectSyncServiceTest extends TestCase
+class ProjectSyncServiceTest extends UnitTestCase
 {
     protected string $watchDir;
     protected ProjectRepository $projects;

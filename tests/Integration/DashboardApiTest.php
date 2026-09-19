@@ -8,6 +8,7 @@ use DevAppPro\Tests\TestCase;
 /**
  * Integrační testy pro Dashboard API (přes HTTP).
  * Nová nástěnka: kpis + klienti + projekty s agregacemi + pás "Co řešit".
+  * @group dashboard
  */
 class DashboardApiTest extends TestCase
 {
@@ -98,6 +99,9 @@ class DashboardApiTest extends TestCase
 
     /**
      * Login, GET /api/dashboard → 200, má kpis/clients/projects/attention.
+     */
+    /**
+     * @group smoke
      */
     public function test_dashboard_po_prihlaseni_vrati_200(): void
     {

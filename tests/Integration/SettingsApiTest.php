@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Settings API.
+  * @group settings
  */
 class SettingsApiTest extends TestCase
 {

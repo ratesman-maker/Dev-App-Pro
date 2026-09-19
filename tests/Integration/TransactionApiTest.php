@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Transactions API (přes HTTP).
+  * @group finance
  */
 class TransactionApiTest extends TestCase
 {
@@ -40,6 +41,9 @@ class TransactionApiTest extends TestCase
 
     /**
      * POST {type:"income", amount_cents:50000, category:"income_project", transaction_date:"2026-09-11"} → 201.
+     */
+    /**
+     * @group smoke
      */
     public function test_vytvoreni_income(): void
     {

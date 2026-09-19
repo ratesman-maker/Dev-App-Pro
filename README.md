@@ -273,14 +273,23 @@ Podrobný postup: [docs/duplicator-import.md](docs/duplicator-import.md)
 
 ## Testování
 
+Testy jsou kategorizované podle modulů a profilů spouštění:
+
 ```bash
-cd /var/www/devapppro
-./vendor/bin/phpunit
+bin/test.sh smoke                # kritická cesta (8 testů, ~10 s) — po každé změně
+bin/test.sh unit                 # unit testy (repositáře, služby) — bez HTTP serveru
+bin/test.sh integration          # všechny API testy
+bin/test.sh integration invoices # jen modul (auth, clients, projects, tasks, invoices,
+                                 # finance, notes, files, settings, dashboard)
+bin/test.sh security             # bezpečnostní testy
+bin/test.sh full                 # kompletní sada — před push
 ```
 
+- **Skupiny modulů** — PHPUnit `@group` anotace, modul lze spustit i přímo: `vendor/bin/phpunit --group invoices`
+- **Base třídy** — `UnitTestCase` (test DB bez serveru) vs `TestCase` (DB + PHP built-in server na 8080)
 - Test DB se resetuje před každým testem (`devapppro_test`, schema.sql + seed_test.sql)
-- Integration testy běží proti PHP built-in serveru na portu 8080 (`tests/test-router.php`)
-- 220+ testů: Unit (repositáře, služby) + Integration (API přes HTTP) + Security
+- **CI** — GitHub Actions (`.github/workflows/tests.yml`): MariaDB service + `bin/test.sh full` při pushi na main / PR
+- 220+ testů: Unit + Integration (API přes HTTP) + Security
 
 ---
 

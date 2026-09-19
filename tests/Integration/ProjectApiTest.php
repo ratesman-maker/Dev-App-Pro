@@ -7,6 +7,7 @@ use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Projects API (přes HTTP).
+  * @group projects
  */
 class ProjectApiTest extends TestCase
 {
@@ -40,6 +41,9 @@ class ProjectApiTest extends TestCase
 
     /**
      * Login, POST {name:"Web redesign"} → 201, má id, status='active'.
+     */
+    /**
+     * @group smoke
      */
     public function test_vytvoreni_projektu(): void
     {
