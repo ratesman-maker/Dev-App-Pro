@@ -114,6 +114,18 @@
 - Položky se zobrazují v InvoiceDetailModal
 - PDF endpoint: GET /api/invoices/{id}/pdf (frontend volá bez .php, Apache rewrite zachovává REQUEST_URI)
 
+## GitHub pravidla (dohodnuto 19. 9. 2026)
+- Repo: https://github.com/ratesman-maker/Dev-App-Pro (soukromé, větev main)
+- Identita commitů: Miroslav Bartík <jajsem@miroslavbartik.cz> (přes `git -c user.name=... -c user.email=...` nebo env proměnné, NEměnit git config)
+- **Větvení**: feature větve — každá změna ve větvi `feat/<nazev>` / `fix/<nazev>`; po dokončení merge do main (`git merge --no-ff`), pak push
+- **Frekvence**: commitovat průběžně po logických celcích, **push po milníku nebo na vyžádání uživatele**
+- **Commit zprávy**: česky, stručně "co a proč", zachovat Devin footer (Generated with Devin + Co-Authored-By)
+- **Nikdy force-push** (historie se nepřepisuje), nikdy nemazat větve bez vědomí uživatele
+- Před merge/pushem vždy `git pull` (vyhnout se konfliktům); pull s rebase jen když je to bezpečné
+- **Necommituje se**: `.env`, `config/*.php`, `storage/`, logy, vendor/node_modules/dist (hlídá .gitignore), WordPress weby v /run/media/ratesman/Projekty (jsou mimo repo)
+- Credentials: token v ~/.git-credentials (600), push přes `git -c credential.helper=store push`
+- Po každé migraci DB aktualizovat schema.sql, po každé funkci README.md (je-li relevantní)
+
 ## Testy
 - Spuštění: `cd /var/www/devapppro && ./vendor/bin/phpunit`
 - Test DB se resetuje před každým testem (setUp/tearDown)
