@@ -36,3 +36,4 @@ Thumbs.db
 # Lokální artefakty
 .backup-path
 .phpunit.cache/
+.user.ini
