@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# pre-push gate: nic na GitHub bez zelených testů
+# Aktivace: git config core.hooksPath bin/hooks
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+
+echo "pre-push: unit testy..."
+bin/test.sh unit
+echo "pre-push: smoke testy..."
+bin/test.sh smoke
+echo "pre-push: OK"
