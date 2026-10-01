@@ -127,8 +127,11 @@ class Auth
         $maxAttempts = RATE_LIMIT_MAX_ATTEMPTS;
         $windowHours = RATE_LIMIT_WINDOW_HOURS;
 
-        // Časový okno pro rate limiting (vypočítáno v PHP, ne v SQL)
-        $cutoff = date('Y-m-d H:i:s', time() - $windowHours * 3600);
+        // Časový okno počítá DB — attempted_at je CURRENT_TIMESTAMP v TZ serveru,
+        // PHP date() by při rozdílné TZ app vs DB rate limit tiše vyplo
+        $cutoff = (string) $pdo->query(
+            "SELECT NOW() - INTERVAL " . (int)($windowHours * 3600) . " SECOND"
+        )->fetchColumn();
 
         // Počet neúspěšných pokusů z IP za okno
         $stmt = $pdo->prepare(
