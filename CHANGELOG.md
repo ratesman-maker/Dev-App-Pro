@@ -17,6 +17,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ### Fixed
 - Rate limit přihlášení: cutoff počítán v DB (`NOW() - INTERVAL`), ne PHP `date()` — při rozdílné TZ aplikace/DB (např. CI kontejner v UTC) se limit nikdy neaktivoval
+- README: opraveny instalační příkazy DB (chyběl výběr databáze), secrets jsou `SetEnv` ve vhostu (ne `.env`), doplněn hosting timer a `finance-overview` endpoint
 
 ### Added
 - Pre-push hook `bin/hooks/pre-push` — unit + smoke testy blokují push při selhání

@@ -137,6 +137,7 @@ Moderní nástěnka ve stylu shadcn dashboard-01:
 
 ### Předpoklady
 - Apache 2.4 (vhost pro localhost, mod_rewrite), PHP 8.5 + FPM, MariaDB, Composer, Node.js 22
+- Mailpit (lokální SMTP catcher — reset hesla apod.; `sendmail_path` ve FPM conf.d), systemd workery + cron (viz CLI skripty a cron)
 
 ### Kroky
 
@@ -154,10 +155,11 @@ npm install
 npm run build
 
 # 4. Konfigurace (viz níže)
-#    - config/config.php, config/database.php, .env
+#    - config/config.php, config/database.php + secrets (SetEnv ve vhostu)
 
 # 5. Databáze
-mysql -u root -p < database/schema.sql   # vytvořit DB nejprve
+mysql -u root -p -e "CREATE DATABASE devapppro CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p devapppro < database/schema.sql
 mysql -u root -p devapppro < database/seed.sql
 
 # 6. Apache vhost pro https://localhost (+ SSL přes mkcert)
@@ -177,9 +179,9 @@ npm run dev        # http://localhost:5173, proxy /api → localhost
 |---|---|
 | `config/config.php` | Konstanty aplikace (APP_NAME, RATE_LIMIT, PROJECTS_WATCH_DIR, BACKUPS_DIR…) |
 | `config/database.php` | PDO připojení (host, dbname, user, pass, options) |
-| `.env` | Tajemství: `DEVAPPPRO_WP_AUTOLOGIN_SECRET`, `DEVAPPPRO_CREDENTIALS_ENCRYPTION_KEY` (načítá Apache přes SetEnv) |
+| Apache vhost | Tajemství `DEVAPPPRO_WP_AUTOLOGIN_SECRET`, `DEVAPPPRO_CREDENTIALS_ENCRYPTION_KEY` přes `SetEnv` direktivy (PHP je čte přes `getenv()`) |
 
-> `.env`, `config/database.php` a `config/config.php` jsou v `.gitignore` — necommitují se.
+> `config/database.php` a `config/config.php` jsou v `.gitignore` — necommitují se.
 
 - `PROJECTS_WATCH_DIR` — složka s projekty (synchronizace, vhosty)
 - `BACKUPS_DIR` — složka se zálohami pro Duplicator import
@@ -221,6 +223,7 @@ Všechny endpointy pod `/api/*`, JSON, vyžadují přihlášení (session), muta
 | invoices | `GET/POST/PUT/DELETE /api/invoices`, `GET /api/invoices/{id}/pdf` |
 | invoice-payments | `GET/POST/PUT/DELETE /api/invoice-payments` |
 | transactions | `GET/POST/PUT/DELETE /api/transactions` |
+| finance-overview | `GET /api/finance-overview` (sjednocený seznam příjmů/výdajů) |
 | notes | `GET/POST/PUT/DELETE /api/notes` (+ polymorfní attachments) |
 | files | `GET/POST/DELETE /api/files`, `GET /api/files/{id}/download|thumbnail` |
 | worklog | `GET/POST/PUT/DELETE /api/worklog`, přílohy |
@@ -254,7 +257,7 @@ Všechny endpointy pod `/api/*`, JSON, vyžadují přihlášení (session), muta
 | `fix-backup-permissions.php` | Oprávnění záloh (4:00) |
 | `rollback-php-versions.sh` | Rollback PHP verzí po chybě |
 
-Cron: `/etc/cron.d/devapppro-cleanup`, `/etc/cron.d/devapppro-sync` + systemd timery (php-version, delete-project).
+Cron: `/etc/cron.d/devapppro-cleanup`, `/etc/cron.d/devapppro-sync` + systemd timery (`devapppro-php-version`, `devapppro-delete-project`, `devapppro-hosting` — každých 5 s).
 
 ---
 
@@ -262,7 +265,7 @@ Cron: `/etc/cron.d/devapppro-cleanup`, `/etc/cron.d/devapppro-sync` + systemd ti
 
 Aplikace spravuje lokální WordPress projekty:
 
-- **Auto-login do wp-admin** — tlačítko v projektu vygeneruje HMAC token (`DEVAPPPRO_SECRET` sdílený z `.env`), mu-plugin `devapppro-autologin.php` ověří a přihlásí (5 min platnost, bez hesel)
+- **Auto-login do wp-admin** — tlačítko v projektu vygeneruje HMAC token (`DEVAPPPRO_SECRET` v `wp-config.php` projektu), mu-plugin `devapppro-autologin.php` ověří a přihlásí (5 min platnost, bez hesel)
 - **Duplicator import** — zálohy `.zip`/`.daf` v `BACKUPS_DIR` → UI (Projekty → Zálohy → „Vytvořit projekt") nebo CLI. Worker: extrakce → DB → wp-config → URL replace (serialization-safe) → cache cleanup (et-cache, jinak Divi ikony = číslice) → deaktivace security/cache pluginů → vhost + SSL
 - **Search/replace** — `cli/search-replace-db.php` opravuje délky `s:NN:` v serializovaných datech
 - **Per-projekt PHP verze** — `projects.php_version` + FPM pool
@@ -282,7 +285,7 @@ bin/test.sh integration          # všechny API testy
 bin/test.sh integration invoices # jen modul (auth, clients, projects, tasks, invoices,
                                  # finance, notes, files, settings, dashboard)
 bin/test.sh security             # bezpečnostní testy
-bin/test.sh full                 # kompletní sada — před push
+bin/test.sh full                 # kompletní sada — běží v CI na PR
 ```
 
 - **Skupiny modulů** — PHPUnit `@group` anotace, modul lze spustit i přímo: `vendor/bin/phpunit --group invoices`
@@ -309,12 +312,14 @@ bin/test.sh full                 # kompletní sada — před push
 - Bez stínů a inline stylů (CSP), UI ve stylu shadcn, texty česky
 
 **Testy**
-- Nová funkce = nové testy s `@group` modulu, před push `bin/test.sh full`
+- Nová funkce = nové testy s `@group` modulu
+- **Pre-push gate:** `bin/hooks/pre-push` (aktivace `git config core.hooksPath bin/hooks`) spustí `unit` + `smoke`; push při selhání padne. `full` sada běží v CI na PR.
 
 **Git**
-- Feature větve (`feat/`, `fix/`, `docs/`) → merge do main po dokončení
-- Commity česky „co a proč", žádný force-push, `pull` před merge
-- Repo je soukromé; tajemství (`config/*.php`, `.env`) se necommitují
+- Feature větve (`feat/`, `fix/`, `docs/`, `chore/`) → **Pull Request** → CI zelená → merge přes GitHub UI (do main se nepushuje přímo)
+- Commity česky „co a proč", žádný force-push, `pull` před pushem větve
+- Každý PR doplní položku do `CHANGELOG.md` → `[Unreleased]` (Keep a Changelog + SemVer)
+- Tajemství (`config/*.php`, secrets ve vhostu) se necommitují
 
 **Proces**
 - Komunikace česky, ověřovat reálné chování (ne jen syntax), záloha před systémovými změnami
@@ -330,7 +335,7 @@ bin/test.sh full                 # kompletní sada — před push
 - **Uploady** — whitelist MIME↔extenze, max 10 MB, blokace EXE/SH/PHP/JS
 - **SQL injection** — PDO prepared statements všude, whitelisty sloupců
 - **Path traversal** — `is_safe_path()`, `.htaccess` blokuje `..`
-- **Tajemství** — `.env` v .gitignore, fail-fast pokud chybí klíče
+- **Tajemství** — env proměnné přes Apache SetEnv, fail-fast pokud chybí klíče
 - **Error handling** — generické 500 zprávy, logy se sanitizací hesel
 
 ---
