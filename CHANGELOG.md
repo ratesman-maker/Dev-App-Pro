@@ -15,6 +15,9 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ## [Unreleased]
 
+### Fixed
+- Rate limit přihlášení: cutoff počítán v DB (`NOW() - INTERVAL`), ne PHP `date()` — při rozdílné TZ aplikace/DB (např. CI kontejner v UTC) se limit nikdy neaktivoval
+
 ### Added
 - Pre-push hook `bin/hooks/pre-push` — unit + smoke testy blokují push při selhání
 - Changelog a PR workflow (viz AGENTS.md)
