@@ -144,7 +144,7 @@
 - Repo: https://github.com/ratesman-maker/Dev-App-Pro (soukromé, větev main)
 - Identita commitů: Miroslav Bartík <jajsem@miroslavbartik.cz> (přes `git -c user.name=... -c user.email=...` nebo env proměnné, NEměnit git config)
 - **Větvení**: feature větve — každá změna ve větvi `feat/<nazev>` / `fix/<nazev>` / `docs/<nazev>` / `chore/<nazev>`
-- **Merge flow: PŘES PR** — lokální testy → push větve → Pull Request na GitHubu → CI (`.github/workflows/tests.yml`, full testy) musí projít → merge přes GitHub UI. Ve větvi se neaktualizuje dokumentace — jen kód a testy.
+- **Merge flow: PŘES PR** — kód + nové testy vytvořit A SPUSTIT lokálně (musí projít) → push větve → Pull Request na GitHubu → CI (`.github/workflows/tests.yml`, full testy) musí projít → merge přes GitHub UI. Ve větvi se neaktualizuje dokumentace — jen kód a testy.
 - **Pre-push gate**: `bin/hooks/pre-push` (aktivováno přes `git config core.hooksPath bin/hooks`) spouští `unit` + `smoke` testy — push padne, když testy neprojdou. NIKDY neobejít (`--no-verify` je zakázaný).
 - **Frekvence**: commitovat průběžně po logických celcích, **push po milníku nebo na vyžádání uživatele**
 - **Commit zprávy**: česky, stručně "co a proč", BEZ Devin footeru (žádné "Generated with Devin" ani "Co-Authored-By")
