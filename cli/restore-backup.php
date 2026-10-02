@@ -612,6 +612,7 @@ define('DB_COLLATE', '');
 \$table_prefix = '{$tablePrefix}';
 
 define('WP_DEBUG', false);
+define('FS_METHOD', 'direct');
 define('DEVAPPPRO_SECRET', '{$secret}');
 
 if (!defined('ABSPATH')) {

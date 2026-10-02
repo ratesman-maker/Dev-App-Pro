@@ -16,6 +16,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 ## [Unreleased]
 
 ### Fixed
+- `wp-config.php` z restore obsahuje `FS_METHOD=direct` — soubory po obnově vlastní root, jinak WP_Filesystem padá na FTP metodu a např. Kadence fatal na `ftp_nlist()`
 - Hardcoded cesta `/run/media/ratesman/Projekty/` nahrazena konstantou `PROJECTS_WATCH_DIR` (autologin WP, detekce DB z wp-config, generování vhostů, mazání projektů) — na novém stroji všechny tyto funkce tiše selhávaly
 - Hardcoded `/var/www/devapppro` nahrazeno `__DIR__`/`PHP_BINARY` v cli skriptech — restore a PHP-version workery negenerovaly vhosty (volání na neexistující cestu tiše selhalo)
 - Generátor vhostů už nepoužívá `php_admin_value` (mod_php direktiva, s FPM shodí configtest) — limity se zapisují do `.user.ini` v docrootu projektu
