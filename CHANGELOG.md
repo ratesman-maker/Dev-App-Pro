@@ -16,6 +16,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 ## [Unreleased]
 
 ### Fixed
+- URL replace při restore mapuje obě stará schémata na nové (vždy https) URL — dříve `http://` přežilo a způsobovalo mixed content s varováním „nezabezpečeno“ v prohlížeči; `search-replace-db.php` umí i čistou změnu schématu na stejném hostu
 - Projektové vhosty bindují `*:80`/`*:443` místo `127.0.0.1` — `*.localhost` resolveuje na `::1` a prohlížeče IPv6 preferují; Apache teď poslouchá na obou loopback rodinách
 - Restore worker selže hlasitě, když běží bez `DEVAPPPRO_WP_AUTOLOGIN_SECRET` v env — dříve tiše zapsal `cli_placeholder` do wp-config.php a autologin pak odmítal tokeny
 - `wp-config.php` z restore obsahuje `FS_METHOD=direct` — soubory po obnově vlastní root, jinak WP_Filesystem padá na FTP metodu a např. Kadence fatal na `ftp_nlist()`
