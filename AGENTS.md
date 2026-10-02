@@ -144,13 +144,13 @@
 - Repo: https://github.com/ratesman-maker/Dev-App-Pro (soukromé, větev main)
 - Identita commitů: Miroslav Bartík <jajsem@miroslavbartik.cz> (přes `git -c user.name=... -c user.email=...` nebo env proměnné, NEměnit git config)
 - **Větvení**: feature větve — každá změna ve větvi `feat/<nazev>` / `fix/<nazev>` / `docs/<nazev>` / `chore/<nazev>`
-- **Merge flow: PŘES PR** — push větve → Pull Request na GitHubu → CI (`.github/workflows/tests.yml`, full testy) musí projít → merge přes GitHub UI. Lokální merge do main + push main už se nedělá.
+- **Merge flow: PŘES PR** — lokální testy → push větve → Pull Request na GitHubu → CI (`.github/workflows/tests.yml`, full testy) musí projít → merge přes GitHub UI. Ve větvi se neaktualizuje dokumentace — jen kód a testy.
 - **Pre-push gate**: `bin/hooks/pre-push` (aktivováno přes `git config core.hooksPath bin/hooks`) spouští `unit` + `smoke` testy — push padne, když testy neprojdou. NIKDY neobejít (`--no-verify` je zakázaný).
 - **Frekvence**: commitovat průběžně po logických celcích, **push po milníku nebo na vyžádání uživatele**
 - **Commit zprávy**: česky, stručně "co a proč", BEZ Devin footeru (žádné "Generated with Devin" ani "Co-Authored-By")
 - **Nikdy force-push** (historie se nepřepisuje), nikdy nemazat větve bez vědomí uživatele
 - Před push větve: `git pull origin main` + případný rebase jen když je to bezpečné
-- **Changelog**: každý PR doplní položku do `CHANGELOG.md` → `[Unreleased]` (sekce Added/Changed/Fixed/Removed/Security, česky). Release: `[Unreleased]` → `[X.Y.Z] - datum`, bump `APP_VERSION` v config + `git tag vX.Y.Z` (SemVer)
+- **Changelog + dokumentace**: AŽ PO merge do main — `CHANGELOG.md` (`[Unreleased]`, sekce Added/Changed/Fixed/Removed/Security, česky), `README.md` a lokální dokumentace se aktualizují v samostatném commitu pushnutém přímo na `main` (docs commity jsou výjimka z PR gate). Release: `[Unreleased]` → `[X.Y.Z] - datum`, bump `APP_VERSION` v config + `git tag vX.Y.Z` (SemVer)
 - **Necommituje se**: `.env`, `config/*.php`, `storage/`, logy, vendor/node_modules/dist (hlídá .gitignore), WordPress weby v PROJECTS_WATCH_DIR (jsou mimo repo)
 - Credentials: token v ~/.git-credentials (600), push přes `git -c credential.helper=store push`
 - Po každé migraci DB aktualizovat schema.sql, po každé funkci README.md (je-li relevantní)
