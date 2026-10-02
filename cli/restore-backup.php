@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Spouští se cronem: php restore-backup.php --process-pending
  *
  * Proces:
- * 1. Extrakce zip do /run/media/ratesman/Projekty/{name}/
+ * 1. Extrakce zip do PROJECTS_WATCH_DIR/{name}/
  * 2. Detekce SQL souboru (Duplicator: dup-installer/*.sql)
  * 3. Vytvoření DB + uživatele
  * 4. Import SQL
@@ -660,7 +660,7 @@ HTACCESS;
     if ($oldUrl) {
         // Detekovat starou cestu na serveru z DB
         $oldPath = findOldPath($sitePdo, $tablePrefix);
-        $newPath = $targetRoot; // /run/media/ratesman/Projekty/{name}
+        $newPath = $targetRoot; // PROJECTS_WATCH_DIR/{name}
         if ($oldPath) {
             logMsg("Detekována stará cesta: {$oldPath} → {$newPath}");
         }
@@ -784,7 +784,7 @@ HTACCESS;
     }
 
     // 8c. Vygenerovat Apache vhost pro nový projekt
-    shell_exec('/usr/bin/php /var/www/devapppro/cli/generate-vhosts.php 2>&1');
+    shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/generate-vhosts.php') . ' 2>&1');
     $test = shell_exec('apache2ctl configtest 2>&1');
     if (str_contains($test, 'Syntax OK')) {
         shell_exec('systemctl reload apache2 2>&1');

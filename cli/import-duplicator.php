@@ -11,13 +11,13 @@ declare(strict_types=1);
  * Použití:
  *   php import-duplicator.php <archive.zip|daf> <slug> [--wait]
  *
- *     <slug>   → složka /run/media/ratesman/Projekty/<slug>,
+ *     <slug>   → složka PROJECTS_WATCH_DIR/<slug>,
  *                doména https://<slug>.localhost, DB wp_<slug_s_podtržítky>
  *     --wait   → čekej na dokončení jobu a vypiš průběh statusů
  *
  * Příklad:
  *   php cli/import-duplicator.php \
- *     /run/media/ratesman/Projekty/Zalohy/20260911_obereggenannacom_..._archive.zip \
+ *     PROJECTS_WATCH_DIR/Zalohy/20260911_obereggenannacom_..._archive.zip \
  *     obereggen-anna --wait
  */
 

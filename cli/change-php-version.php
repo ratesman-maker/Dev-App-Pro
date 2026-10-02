@@ -55,7 +55,7 @@ try {
     $stmt->execute([$newVersion, $projectId]);
 
     // 3. Regenerovat vhosty
-    $output = shell_exec('/usr/bin/php /var/www/devapppro/cli/generate-vhosts.php 2>&1');
+    $output = shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/generate-vhosts.php') . ' 2>&1');
     echo "  Vhosty regenerovány\n";
 
     // 4. Test Apache konfigurace
@@ -65,7 +65,7 @@ try {
         // Rollback
         $stmt = $pdo->prepare('UPDATE projects SET php_version = ? WHERE id = ?');
         $stmt->execute([$oldVersion, $projectId]);
-        shell_exec('/usr/bin/php /var/www/devapppro/cli/generate-vhosts.php 2>&1');
+        shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/generate-vhosts.php') . ' 2>&1');
         throw new RuntimeException("Apache configtest selhal: {$test}");
     }
 

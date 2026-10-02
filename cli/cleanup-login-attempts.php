@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Spouští se denně přes cron.
  *
  * Použití v cronu:
- * 0 3 * * * ratesman /usr/bin/php /var/www/devapppro/cli/cleanup-login-attempts.php >> /var/log/devapppro-cleanup.log 2>&1
+ * 0 3 * * * ratesman /usr/bin/php /home/ratesman/projekty/devapppro/cli/cleanup-login-attempts.php >> /var/log/devapppro-cleanup.log 2>&1
  */
 
 require_once __DIR__ . '/../bootstrap.php';

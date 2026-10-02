@@ -9,7 +9,7 @@
 set -euo pipefail
 
 SUDOERS_FILE="/etc/sudoers.d/devapppro-wp-install"
-SCRIPT_PATH="/var/www/devapppro/cli/install-wordpress.php"
+SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd)/install-wordpress.php"
 
 echo "Vytvářím sudoers pravidlo pro WordPress installer..."
 

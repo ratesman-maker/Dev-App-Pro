@@ -1,11 +1,11 @@
 #!/bin/bash
 #
 # Rollback skript - vrátí Apache, PHP, SSL a DB do stavu před změnami.
-# Použití: sudo /var/www/devapppro/cli/rollback-php-versions.sh
+# Použití: sudo ~/projekty/devapppro/cli/rollback-php-versions.sh
 #
 set -euo pipefail
 
-BACKUP_PATH_FILE="/var/www/devapppro/.backup-path"
+BACKUP_PATH_FILE="$(cd "$(dirname "$0")/.." && pwd)/.backup-path"
 
 if [ ! -f "$BACKUP_PATH_FILE" ]; then
     echo "CHYBA: Záloha nebyla nalezena ($BACKUP_PATH_FILE neexistuje)."

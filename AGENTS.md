@@ -62,6 +62,8 @@
 - Vhost: /etc/apache2/sites-available/devapppro-localhost.conf
 - Per-project vhosty: /etc/apache2/sites-available/devapppro-projects/ (auto-generováno)
 - Vhost generátor: cli/generate-vhosts.php (maže i zastaralé .conf soubory projektů, které se už negenerují)
+- Aktivace projektových vhostů: souhrnný conf `sites-available/devapppro-projects.conf` (Include per-project confů) → aktivní přes `a2ensite devapppro-projects` (symlink v sites-enabled)
+- PHP limity projektů: generátor zapisuje `.user.ini` do docrootu (FPM nepodporuje php_admin_value ve vhostu)
 - ports.conf záloha: /etc/apache2/ports.conf.bak.20260911
 - mod_rewrite: povolen
 - .htaccess: AllowOverride All
@@ -149,7 +151,7 @@
 - **Nikdy force-push** (historie se nepřepisuje), nikdy nemazat větve bez vědomí uživatele
 - Před push větve: `git pull origin main` + případný rebase jen když je to bezpečné
 - **Changelog**: každý PR doplní položku do `CHANGELOG.md` → `[Unreleased]` (sekce Added/Changed/Fixed/Removed/Security, česky). Release: `[Unreleased]` → `[X.Y.Z] - datum`, bump `APP_VERSION` v config + `git tag vX.Y.Z` (SemVer)
-- **Necommituje se**: `.env`, `config/*.php`, `storage/`, logy, vendor/node_modules/dist (hlídá .gitignore), WordPress weby v /run/media/ratesman/Projekty (jsou mimo repo)
+- **Necommituje se**: `.env`, `config/*.php`, `storage/`, logy, vendor/node_modules/dist (hlídá .gitignore), WordPress weby v PROJECTS_WATCH_DIR (jsou mimo repo)
 - Credentials: token v ~/.git-credentials (600), push přes `git -c credential.helper=store push`
 - Po každé migraci DB aktualizovat schema.sql, po každé funkci README.md (je-li relevantní)
 

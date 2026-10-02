@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Tento skript spouští GC explicitně přes CLI.
  *
  * Použití v cronu:
- * 30 3 * * * ratesman /usr/bin/php /var/www/devapppro/cli/session-gc.php >> /var/log/devapppro-cleanup.log 2>&1
+ * 30 3 * * * ratesman /usr/bin/php /home/ratesman/projekty/devapppro/cli/session-gc.php >> /var/log/devapppro-cleanup.log 2>&1
  */
 
 // Nastavit GC parametry pro tento běh
