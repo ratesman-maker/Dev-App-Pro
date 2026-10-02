@@ -16,6 +16,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 ## [Unreleased]
 
 ### Fixed
+- Restore worker: výstup generátoru vhostů se loguje a ověřuje se existence vhost souboru; selhání `wp plugin list` loguje varování místo tichého přeskočení deaktivace problematických pluginů; před stavem `completed` se provede HTTP health check obnoveného webu
 - URL replace při restore i v `cli/search-replace-db.php` nově pokrývá i JSON-escapované varianty URL (`http:\/\/`), které Kadence/Colibri ukládají do serializovaných option blobů — dříve po restore zůstávaly `http://` odkazy na původní doménu → mixed content a varování "spojení není bezpečné" v prohlížeči
 
 ### Fixed
