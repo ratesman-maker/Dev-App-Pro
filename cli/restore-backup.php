@@ -740,11 +740,15 @@ HTACCESS;
     $wpCli = '/usr/local/bin/wp';
     if (file_exists($wpCli)) {
         $listCmd = sprintf(
-            'sudo -u ratesman %s --path=%s plugin list --status=active --field=name 2>/dev/null',
+            'sudo -u ratesman %s --path=%s plugin list --status=active --field=name 2>&1',
             escapeshellarg($wpCli),
             escapeshellarg($targetRoot)
         );
-        $activePlugins = array_filter(array_map('trim', explode("\n", (string) shell_exec($listCmd))));
+        $listResult = runCmd($listCmd);
+        if ($listResult['code'] !== 0) {
+            logMsg('VAROVÁNÍ: wp-cli plugin list selhal (' . trim($listResult['output']) . ') - deaktivace problematických pluginů přeskočena');
+        }
+        $activePlugins = array_filter(array_map('trim', explode("\n", (string) $listResult['output'])));
         $toDisable = array_values(array_intersect($activePlugins, $disablePlugins));
         if (!empty($toDisable)) {
             $deactCmd = sprintf(
@@ -795,7 +799,11 @@ HTACCESS;
     }
 
     // 8c. Vygenerovat Apache vhost pro nový projekt
-    shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/generate-vhosts.php') . ' 2>&1');
+    $genResult = runCmd(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/generate-vhosts.php') . ' 2>&1');
+    $vhostFile = '/etc/apache2/sites-available/devapppro-projects/' . $projectName . '.conf';
+    if ($genResult['code'] !== 0 || !file_exists($vhostFile)) {
+        logMsg("VAROVÁNÍ: vhost pro {$projectName} se nepodařilo vygenerovat: " . trim($genResult['output']));
+    }
     $test = shell_exec('apache2ctl configtest 2>&1');
     if (str_contains($test, 'Syntax OK')) {
         shell_exec('systemctl reload apache2 2>&1');
@@ -809,6 +817,16 @@ HTACCESS;
     if (file_exists($wpCli)) {
         $flushOutput = shell_exec("sudo -u ratesman {$wpCli} --path=" . escapeshellarg($targetRoot) . " rewrite flush 2>&1");
         logMsg("WP rewrite rules flush: {$flushOutput}");
+    }
+
+    // 8e. Post-restore health check - ověří, že web skutečně odpovídá
+    $healthCode = trim((string) shell_exec(
+        'curl -s -o /dev/null -w %{http_code} --max-time 15 ' . escapeshellarg("https://{$projectName}.localhost/")
+    ));
+    if (in_array($healthCode, ['200', '301', '302'], true)) {
+        logMsg("Health check OK: https://{$projectName}.localhost/ vrací HTTP {$healthCode}");
+    } else {
+        logMsg("VAROVÁNÍ: health check selhal - https://{$projectName}.localhost/ vrací HTTP '{$healthCode}'");
     }
 
     // 9. Completed
