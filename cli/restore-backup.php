@@ -185,8 +185,11 @@ function replaceUrlsInDb(string $dbName, string $dbUser, string $dbPass, string 
         if (!empty($parsed['host'])) {
             $host = $parsed['host'];
             $path = $parsed['path'] ?? '';
-            $replacements['https://' . $host . $path] = rtrim($newUrl, '/') . $path;
-            $replacements['http://' . $host . $path] = rtrim(str_replace('https://', 'http://', $newUrl), '/') . $path;
+            $newBase = rtrim($newUrl, '/') . $path;
+            // Obě staré varianty (http i https) mapovat na novou URL — nová je vždy https,
+            // jinak se do DB propíše http:// <doména> a web má mixed content
+            $replacements['https://' . $host . $path] = $newBase;
+            $replacements['http://' . $host . $path] = $newBase;
         } else {
             $replacements[$oldUrl] = $newUrl;
         }

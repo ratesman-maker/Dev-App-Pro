@@ -123,9 +123,15 @@ if ($oldUrl && $newUrl) {
         if ($newPath === '') {
             $newBase .= $path;
         }
-        $replacements['https://' . $host . $path] = $newBase;
-        $newHttpBase = preg_replace('#^https://#', 'http://', $newBase, 1);
-        $replacements['http://' . $host . $path] = $newHttpBase;
+        if (($newParsed['host'] ?? '') === $host && ($parsed['scheme'] ?? 'http') !== ($newParsed['scheme'] ?? '')) {
+            // Čistá změna schématu na stejném hostu (např. http→https) — nahradit jen dané schéma
+            $replacements[($parsed['scheme'] ?? 'http') . '://' . $host . $path] = $newBase;
+        } else {
+            // Obě staré varianty mapovat na newBase — nové URL je autoritativní,
+            // jinak se při přesunu na https propíše http:// a vznikne mixed content
+            $replacements['https://' . $host . $path] = $newBase;
+            $replacements['http://' . $host . $path] = $newBase;
+        }
     } else {
         $replacements[$oldUrl] = $newUrl;
     }
