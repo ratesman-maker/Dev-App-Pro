@@ -304,7 +304,7 @@ class ProjectApiController extends ApiController
         $dbName = null;
         $dbUser = null;
         if ($folderPath) {
-            $configFile = '/run/media/ratesman/Projekty/' . $folderPath . '/wp-config.php';
+            $configFile = PROJECTS_WATCH_DIR . '/' . $folderPath . '/wp-config.php';
             if (file_exists($configFile)) {
                 $config = file_get_contents($configFile);
                 if (preg_match("/define\(\s*'DB_NAME',\s*'([^']+)'\s*\);/", $config, $m)) {
@@ -456,7 +456,7 @@ class ProjectApiController extends ApiController
             }
         }
 
-        // folder_path - název složky v /run/media/ratesman/Projekty/ (jen pokud je v inputu)
+        // folder_path - název složky v PROJECTS_WATCH_DIR/ (jen pokud je v inputu)
         if (array_key_exists('folder_path', $input)) {
             $folderPath = $input['folder_path'];
             if ($folderPath !== null && $folderPath !== '') {
@@ -576,7 +576,7 @@ class ProjectApiController extends ApiController
      */
     private function detectWpAdminUser(array $project): ?string
     {
-        $docRoot = '/run/media/ratesman/Projekty/' . $project['folder_path'];
+        $docRoot = PROJECTS_WATCH_DIR . '/' . $project['folder_path'];
         $configFile = $docRoot . '/wp-config.php';
         if (!file_exists($configFile)) {
             return null;

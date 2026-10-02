@@ -69,7 +69,7 @@ foreach ($projects as $project) {
     $folder = $project['folder_path'];
     $name = $project['name'];
     $phpVersion = $project['php_version'] ?: $defaultPhp;
-    $docRoot = '/run/media/ratesman/Projekty/' . $folder;
+    $docRoot = PROJECTS_WATCH_DIR . '/' . $folder;
     $serverName = $folder . '.localhost';
 
     if (!isset($phpVersions[$phpVersion])) {
@@ -106,10 +106,6 @@ foreach ($projects as $project) {
     </FilesMatch>
     ProxyPassMatch "^/(.*\.php(/.*)?)$" "unix:{$fpmSocket}|fcgi://localhost{$docRoot}/\$1"
 
-    php_admin_value upload_max_filesize 128M
-    php_admin_value post_max_size 128M
-    php_admin_value memory_limit 512M
-    php_admin_value max_execution_time 300
 </VirtualHost>
 
 <VirtualHost 127.0.0.1:443>
@@ -132,10 +128,6 @@ foreach ($projects as $project) {
     </FilesMatch>
     ProxyPassMatch "^/(.*\.php(/.*)?)$" "unix:{$fpmSocket}|fcgi://localhost{$docRoot}/\$1"
 
-    php_admin_value upload_max_filesize 128M
-    php_admin_value post_max_size 128M
-    php_admin_value memory_limit 512M
-    php_admin_value max_execution_time 300
 </VirtualHost>
 VHOST;
 
@@ -144,6 +136,11 @@ VHOST;
         echo $vhost . "\n\n";
     } else {
         file_put_contents($vhostFile, $vhost);
+
+        // PHP limity přes .user.ini (FPM nepodporuje php_admin_value ve vhostu)
+        // Auto-generováno - ruční změny se při regeneraci přepíší
+        $userIni = "upload_max_filesize = 128M\npost_max_size = 128M\nmemory_limit = 512M\nmax_execution_time = 300\n";
+        file_put_contents($docRoot . '/.user.ini', $userIni);
         echo "Vygenerováno: {$serverName} (PHP {$phpVersion})\n";
     }
 

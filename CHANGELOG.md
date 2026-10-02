@@ -16,6 +16,11 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 ## [Unreleased]
 
 ### Fixed
+- Hardcoded cesta `/run/media/ratesman/Projekty/` nahrazena konstantou `PROJECTS_WATCH_DIR` (autologin WP, detekce DB z wp-config, generování vhostů, mazání projektů) — na novém stroji všechny tyto funkce tiše selhávaly
+- Hardcoded `/var/www/devapppro` nahrazeno `__DIR__`/`PHP_BINARY` v cli skriptech — restore a PHP-version workery negenerovaly vhosty (volání na neexistující cestu tiše selhalo)
+- Generátor vhostů už nepoužívá `php_admin_value` (mod_php direktiva, s FPM shodí configtest) — limity se zapisují do `.user.ini` v docrootu projektu
+
+
 - Rate limit přihlášení: cutoff počítán v DB (`NOW() - INTERVAL`), ne PHP `date()` — při rozdílné TZ aplikace/DB (např. CI kontejner v UTC) se limit nikdy neaktivoval
 - README: opraveny instalační příkazy DB (chyběl výběr databáze), secrets jsou `SetEnv` ve vhostu (ne `.env`), doplněn hosting timer a `finance-overview` endpoint
 

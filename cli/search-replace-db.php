@@ -12,7 +12,7 @@ declare(strict_types=1);
  * Použití:
  *   php search-replace-db.php --db=dbname --user=user --pass=pass \
  *     --old-url=https://example.com --new-url=https://example.localhost \
- *     --old-path=/home/www/example.com --new-path=/run/media/.../example
+ *     --old-path=/home/www/example.com --new-path=/home/ratesman/projekty/example
  */
 
 $options = getopt('', ['db:', 'user:', 'pass:', 'old-url::', 'new-url::', 'old-path::', 'new-path::', 'dry-run']);

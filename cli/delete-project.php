@@ -40,7 +40,7 @@ try {
     // 1. Smazat soubory na disku
     if ($folderPath) {
         updateJobStatus($pdo, $jobId, 'deleting_files');
-        $docRoot = '/run/media/ratesman/Projekty/' . $folderPath;
+        $docRoot = PROJECTS_WATCH_DIR . '/' . $folderPath;
         if (is_dir($docRoot)) {
             $output = shell_exec('rm -rf ' . escapeshellarg($docRoot) . ' 2>&1');
             if (is_dir($docRoot)) {
@@ -87,7 +87,7 @@ try {
         }
 
         // Regenerovat hlavní konfig
-        shell_exec('/usr/bin/php /var/www/devapppro/cli/generate-vhosts.php 2>&1');
+        shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/generate-vhosts.php') . ' 2>&1');
 
         // Test a reload
         $test = shell_exec('apache2ctl configtest 2>&1');
