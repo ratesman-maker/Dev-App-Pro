@@ -16,6 +16,9 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 ## [Unreleased]
 
 ### Fixed
+- URL replace při restore i v `cli/search-replace-db.php` nově pokrývá i JSON-escapované varianty URL (`http:\/\/`), které Kadence/Colibri ukládají do serializovaných option blobů — dříve po restore zůstávaly `http://` odkazy na původní doménu → mixed content a varování "spojení není bezpečné" v prohlížeči
+
+### Fixed
 - URL replace při restore mapuje obě stará schémata na nové (vždy https) URL — dříve `http://` přežilo a způsobovalo mixed content s varováním „nezabezpečeno“ v prohlížeči; `search-replace-db.php` umí i čistou změnu schématu na stejném hostu
 - Projektové vhosty bindují `*:80`/`*:443` místo `127.0.0.1` — `*.localhost` resolveuje na `::1` a prohlížeče IPv6 preferují; Apache teď poslouchá na obou loopback rodinách
 - Restore worker selže hlasitě, když běží bez `DEVAPPPRO_WP_AUTOLOGIN_SECRET` v env — dříve tiše zapsal `cli_placeholder` do wp-config.php a autologin pak odmítal tokeny
