@@ -68,8 +68,10 @@ try {
             echo "  Databáze smazána: {$safeDbName}\n";
 
             if ($safeDbUser) {
+                // Restore vytváří usera pro localhost i 127.0.0.1 - smazat oba
                 $rootPdo->exec("DROP USER IF EXISTS '{$safeDbUser}'@'localhost'");
-                echo "  DB uživatel smazán: {$safeDbUser}\n";
+                $rootPdo->exec("DROP USER IF EXISTS '{$safeDbUser}'@'127.0.0.1'");
+                echo "  DB uživatel smazán: {$safeDbUser} (@localhost + @127.0.0.1)\n";
             }
             $rootPdo->exec("FLUSH PRIVILEGES");
         } catch (PDOException $e) {
@@ -87,7 +89,10 @@ try {
         }
 
         // Regenerovat hlavní konfig
-        shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/generate-vhosts.php') . ' 2>&1');
+        $genOutput = shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/generate-vhosts.php') . ' 2>&1');
+        if ($genOutput && trim($genOutput) !== '') {
+            echo "  generate-vhosts: " . trim($genOutput) . "\n";
+        }
 
         // Test a reload
         $test = shell_exec('apache2ctl configtest 2>&1');
