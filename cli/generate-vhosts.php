@@ -90,7 +90,7 @@ foreach ($projects as $project) {
 # PHP: {$phpVersion} ({$fpmSocket})
 # NEUPRAVOVAT RUČNĚ - změny se přepíší
 
-<VirtualHost 127.0.0.1:80>
+<VirtualHost *:80>
     ServerName {$serverName}
     DocumentRoot {$docRoot}
 
@@ -108,7 +108,7 @@ foreach ($projects as $project) {
 
 </VirtualHost>
 
-<VirtualHost 127.0.0.1:443>
+<VirtualHost *:443>
     ServerName {$serverName}
     DocumentRoot {$docRoot}
 
