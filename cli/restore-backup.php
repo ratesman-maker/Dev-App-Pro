@@ -593,6 +593,9 @@ try {
     }
 
     $secret = WP_AUTOLOGIN_SECRET;
+    if ($secret === 'cli_placeholder') {
+        throw new RuntimeException('WP_AUTOLOGIN_SECRET není nastaven — cron worker potřebuje DEVAPPPRO_WP_AUTOLOGIN_SECRET v env (viz /etc/cron.d/devapppro-sync)');
+    }
     $wpConfig = <<<WPCONFIG
 <?php
 /**
