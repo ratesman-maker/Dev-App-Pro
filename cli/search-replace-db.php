@@ -126,11 +126,17 @@ if ($oldUrl && $newUrl) {
         if (($newParsed['host'] ?? '') === $host && ($parsed['scheme'] ?? 'http') !== ($newParsed['scheme'] ?? '')) {
             // Čistá změna schématu na stejném hostu (např. http→https) — nahradit jen dané schéma
             $replacements[($parsed['scheme'] ?? 'http') . '://' . $host . $path] = $newBase;
+            $esc = fn(string $u): string => str_replace('/', '\\/', $u);
+            $replacements[$esc(($parsed['scheme'] ?? 'http') . '://' . $host . $path)] = $esc($newBase);
         } else {
             // Obě staré varianty mapovat na newBase — nové URL je autoritativní,
-            // jinak se při přesunu na https propíše http:// a vznikne mixed content
+            // jinak se při přesunu na https propíše http:// a vznikne mixed content.
+            // Plus escapované varianty pro JSON v serializovaných datech (\/\/)
             $replacements['https://' . $host . $path] = $newBase;
             $replacements['http://' . $host . $path] = $newBase;
+            $esc = fn(string $u): string => str_replace('/', '\\/', $u);
+            $replacements[$esc('https://' . $host . $path)] = $esc($newBase);
+            $replacements[$esc('http://' . $host . $path)] = $esc($newBase);
         }
     } else {
         $replacements[$oldUrl] = $newUrl;
