@@ -40,3 +40,7 @@ Thumbs.db
 
 # Devin MCP - lokalni konfigurace s API klici
 .devin/mcp_config.local.json
+
+# Playwright E2E artefakty
+frontend/test-results/
+frontend/playwright-report/

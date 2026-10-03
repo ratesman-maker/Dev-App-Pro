@@ -104,3 +104,22 @@ jobs:
         run: |
           export DB_HOST=127.0.0.1 DB_NAME=devapppro_test DB_USER=devapppro DB_PASS=devapppro_secret
           bin/test.sh full
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Frontend deps
+        run: npm ci --prefix frontend
+
+      - name: Playwright prohlížeče
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Spustit E2E testy
+        run: |
+          export DB_HOST=127.0.0.1 DB_NAME=devapppro_test DB_USER=devapppro DB_PASS=devapppro_secret
+          bin/test.sh e2e
