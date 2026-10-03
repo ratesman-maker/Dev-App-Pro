@@ -63,11 +63,38 @@ components/ui/PageSkeleton.tsx — loading stav stránky
 
 - [ ] `React.lazy` pro všechny stránky; těžké komponenty (grafy) lazy
 - [ ] `useCallback` pro handlery předávané do memoizovaných komponent (vzor: 6 stránek už ho má)
-- [ ] `useMemo` jen pro drahé výpočty/transformace — ne všude
+- [ ] `useMemo` jen pro drahé výpočty/transformace — ne všude (nememoizovat primitivy/jednoduché výrazy)
 - [ ] Stabilní `key` v seznamech (entity `id`, ne index)
 - [ ] Dlouhé seznamy: server paginace (výchozí), ne virtuální scroll (zatím nepotřeba)
 - [ ] Thumbnail obrázky místo ikon v `FilesPage` — pro nové souborové UI taky
 - [ ] Bundle: `manualChunks` react-vendor (již v vite config), nové těžké deps zvážit (mPDF-like knihovny na FE ne)
+
+### React výkon — pokročilá pravidla
+
+Distilace z Vercel `react-best-practices` (subset aplikovatelný na SPA, bez SSR/Next.js):
+
+**Waterfalls (kritické):**
+- [ ] Nezávislé async operace paralelně — `Promise.all`, paralelní `useQuery` klíče; nikdy sekvenční `await` nezávislých věcí
+- [ ] `await` až v branchi kde se hodnota použije; levnou sync podmínku testovat před await
+
+**Re-rendery:**
+- [ ] Odvozený stav počítat **při renderu**, ne `useEffect` + `setState` (jen když opravdu závisí na předchozím renderu)
+- [ ] **Nikdy komponenty definované uvnitř komponenty** — nová identita → remount + ztráta stavu
+- [ ] Funkcionální `setState` (`setX(prev => …)`) pro stabilní callbacky
+- [ ] `useState(() => drahyVypocet())` — lazy init, ne výpočet každý render
+- [ ] `useDeferredValue` pro drahé filtrování/řazení při psaní (doplňuje `useDebounce`)
+- [ ] `useRef` pro transient hodnoty (scroll pozice, timery, předchozí hodnoty) — ne `useState`, když nemá re-renderovat
+
+**Rendering/JS:**
+- [ ] Podmíněný render **ternárem, ne `&&`** — `{count && <X/>}` vypíše `0` při count=0
+- [ ] Statické JSX vyhnat mimo komponentu (konstantní markup na module level)
+- [ ] `Set`/`Map` pro opakované lookupy místo `array.find`/`includes` v cyklu
+- [ ] Early return místo hlubokého větvení; `toSorted()` pro immutable řazení
+- [ ] Passive listenery u scroll/resize (`{ passive: true }`); localStorage data minimalizovat
+
+**Bundle:**
+- [ ] Přímé importy — ne barrel `import {x} from 'lib'` u těžkých knihoven (recharts, lucide — tree-shakeable, ale importovat jen potřebné)
+- [ ] Preload na intent — `prefetch="intent"` na NavLink už je; rozšiřovat na těžké dialogy
 
 ## TypeScript
 
