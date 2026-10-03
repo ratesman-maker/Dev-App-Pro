@@ -19,8 +19,10 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 - Playwright E2E testy (`bin/test.sh e2e`): 9 speců (login, chybné heslo, redirect nepřihlášeného, nástěnka, Projekty/Úkoly/Klienti, 404) proti `php -S` na `devapppro_test` — pokrývá SPA regrese, které API testy nevidí; běží v CI
 - Statický security scan `bin/security-scan.sh` — 13 kontrol (tracked secrets, SQL interpolace, shell exec bez escapeshellarg, nebezpečné funkce, composer/npm audit, perms, .htaccess, CSRF coverage); exit 1 při CRITICAL, `--strict` i při WARNING
 - `.devin/skills/` — projektové znalostní balíčky pro agenty: `security-review`, `api-design`, `frontend-patterns`, `database-migrations`
-- `.devin/agents/` rozšířeni o `planner` (implementační plány do `plany/` před většími změnami) a `doc-updater` (docs+changelog po merge); `researcher` má Adopt/Extend/Build rozhodovací matici
+- `.devin/agents/` rozšířeni o `planner` (implementační plány do `plany/` před většími změnami) a `doc-updater` (docs+changelog po merge); `researcher` má Adopt/Extend/Build rozhodovací matici, `reviewer` novou fázi attack-surface mapping před checklistem
 - MCP konfigurace `.devin/mcp_config.json` (context7 pro dokumentaci knihoven, sequential-thinking); API klíče se drží v gitignorovaném `.devin/mcp_config.local.json`
+- Skill `.devin/skills/gha-security-review/` — audit GitHub Actions proti pwn request, expression injection a supply-chain; `tests.yml` má nyní `permissions: contents: read` (GITHUB_TOKEN nesmí mít write, který nepotřebuje)
+- A11y pravidla ve `frontend-patterns`: povinný `aria-label` u icon-only tlačítek, `role="alert"` u inline chyb, klávesnicová navigace a focus handling
 
 ### Security
 - `unserialize()` nyní voláno s `allowed_classes => false` u nedůvěryhodných dat (serializované bloby z WP dumpů v restore/search-replace, session soubory) — zamezuje PHP object injection
