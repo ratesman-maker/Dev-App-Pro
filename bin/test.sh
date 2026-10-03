@@ -7,6 +7,7 @@
 #   bin/test.sh integration <modul> - jen modul (auth, clients, projects, tasks, invoices,
 #                                     finance, notes, files, settings, dashboard)
 #   bin/test.sh security            - bezpečnostní testy
+#   bin/test.sh e2e                 - Playwright E2E (build frontendu + php -S + browser testy)
 #   bin/test.sh full                - kompletní sada (před push)
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -34,6 +35,10 @@ case "$CMD" in
         ;;
     security)
         exec "$PHPUNIT" --testsuite Security
+        ;;
+    e2e)
+        # Playwright E2E: potřebuje build frontendu (assets/dist) + devapppro_test DB
+        (cd frontend && npm run build && npx playwright test "$@")
         ;;
     full)
         exec "$PHPUNIT"

@@ -37,3 +37,7 @@ Thumbs.db
 .backup-path
 .phpunit.cache/
 .user.ini
+
+# Playwright E2E artefakty
+frontend/test-results/
+frontend/playwright-report/
