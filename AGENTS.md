@@ -160,7 +160,7 @@
 
 ## Testy
 - Spouštění přes profily: `bin/test.sh <profil>` (viz níže), případně přímo `vendor/bin/phpunit`
-- Profily: `smoke` (8 kritických testů, ~10 s) · `unit` (bez HTTP serveru) · `integration [modul]` · `security` · `full` (před push)
+- Profily: `smoke` (8 kritických testů, ~10 s) · `unit` (bez HTTP serveru) · `integration [modul]` · `security` · `e2e` (Playwright, viz níže) · `full` (před push)
 - Skupiny modulů (`--group`): auth, clients, projects, tasks, invoices, finance, notes, files, settings, dashboard, security + `smoke`
 - Base třídy: `UnitTestCase` (test DB bez serveru — repositáře, služby) vs `TestCase` (DB + PHP built-in server na 8080 + Guzzle klient)
 - Test DB se resetuje před každým testem (setUp/tearDown), test server: tests/test-router.php
@@ -168,6 +168,7 @@
 - CI: GitHub Actions `.github/workflows/tests.yml` (mariadb service, config se v CI generuje, protože config/*.php jsou gitignored)
 - POZOR: bootstrap error handler převádí i @-potlačená varování na ErrorException → TestCase::waitForServer musí fsockopen obalit try/catch (opraveno)
 - TestCase předává serveru i DEVAPPPRO_WP_AUTOLOGIN_SECRET / DEVAPPPRO_CREDENTIALS_ENCRYPTION_KEY (test dummy hodnoty)
+- E2E (Playwright): `bin/test.sh e2e` = build frontendu + specy z `frontend/e2e/`; server `tests/e2e/serve.sh` na 8099 (nekoliduje s 8080), seed `tests/e2e/seed-user.php` založí schéma když chybí + uživatele e2e_admin + reset login_attempts; jiné porty/credentials přes env E2E_USERNAME/E2E_PASSWORD
 - schema.sql MUSÍ odpovídat live DB (drop+create celé DB, testy na tom stojí); po migracích vždy doplnit nové tabulky/sloupce
 - schema.sql má SET FOREIGN_KEY_CHECKS=0 jen na začátku a =1 na konci (žádné SET uprostřed - jinak DROP projektů selže na 1451 při datech v child tabulkách)
 

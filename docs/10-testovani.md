@@ -28,9 +28,15 @@ npm install --save-dev vitest @testing-library/react @testing-library/jest-dom j
 - **jsdom** pro DOM simulaci
 - **msw** (Mock Service Worker) pro API mock
 
-### 1.3 E2E (volitelně, později)
+### 1.3 E2E (Playwright)
 
-- **Playwright** - pokud bude potřeba, zatím jen unit + integrační
+- **@playwright/test** ve `frontend/`, specy v `frontend/e2e/` (`*.spec.ts`)
+- Server `tests/e2e/serve.sh` — `php -S` na 8099 s `DB_NAME=devapppro_test`; `tests/e2e/seed-user.php` založí schéma (když po PHPUnit resetu chybí), seedne `e2e_admin` a resetuje `login_attempts`
+- `test-router.php` mapuje `/assets/` a `/fonts/` jako `.htaccess`, SPA fallback na `assets/dist/index.html`
+
+```bash
+bin/test.sh e2e   # build frontendu + playwright test
+```
 
 ---
 
