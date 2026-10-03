@@ -15,6 +15,9 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ## [Unreleased]
 
+### Added
+- Detekce typu projektu rozšířena o typ `php` (obsahuje `.php` v kořenu); statické weby mají vhosty bez FPM direktiv, PHP selektor v UI se zobrazuje jen pro `wordpress`/`php` projekty a API `/php-version` ostatní typy odmítá. Sync přepočítává typ při změně obsahu složky
+
 ### Fixed
 - Přepínání PHP verzí: složka s nevalidním hostname (mezera, diakritika) rozbila Include v agregovaném Apache confu → configtest selhával → změna PHP verze i regenerace vhostů padaly pro všechny projekty. `isValidFolderName` nyní vyžaduje validní DNS hostname `[a-z0-9-]`, generátor vhostů nevalidní složky přeskočí a Include cesty jsou v uvozovkách
 - Mazání projektu: DB uživatel se smaže pro `@localhost` i `@127.0.0.1` (restore oba vytváří, `@127.0.0.1` dříve přežíval jako osiřelý); výstup regenerace vhostů se loguje
