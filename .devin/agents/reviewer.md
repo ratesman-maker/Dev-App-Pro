@@ -20,6 +20,8 @@ Hodnotíš kód podle 3 priorit projektu: Bezpečnost, Modularita, Rychlost.
 
 ### 1. Bezpečnost (priorita 1)
 
+Detailní security checklist (vzorové kódy, root workery, restore archivy): `.devin/skills/security-review/SKILL.md` — při security review ho použij jako zdroj pravdy.
+
 - [ ] Prepared statements (PDO, žádné string concat v SQL)
 - [ ] CSRF token pro POST/PUT/DELETE
 - [ ] Escapování výstupu (htmlspecialchars v PHP, JSX default)
