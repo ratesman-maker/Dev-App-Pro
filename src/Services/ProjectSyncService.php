@@ -96,7 +96,7 @@ class ProjectSyncService
             }
 
             // Ignoruj systémové složky (Windows/exFAT) a složky, které nejsou webové projekty
-            if (in_array($entry, ['$RECYCLE.BIN', 'System Volume Information', '.devin', 'Zalohy', 'Podklady', 'Dorsen', 'webspecialistacz', 'certs', 'devapppro', 'test'], true)) {
+            if (in_array($entry, ['$RECYCLE.BIN', 'System Volume Information', '.devin', 'Zalohy', 'Podklady', 'Dorsen', 'webspecialistacz', 'certs', 'devapppro', 'test', 'knowledge-base', 'Knowledge Base'], true)) {
                 continue;
             }
 
@@ -193,6 +193,12 @@ class ProjectSyncService
 
         // Zpětné lomítko (Windows)
         if (str_contains($name, '\\')) {
+            return false;
+        }
+
+        // Název složky se stává hostname <název>.localhost a názvem Apache confu -
+        // musí být validní DNS hostname (jinak rozbije generovaný Apache config)
+        if (!preg_match('/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/', $name)) {
             return false;
         }
 

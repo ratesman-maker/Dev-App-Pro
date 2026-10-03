@@ -67,7 +67,7 @@ class ProjectSyncServiceTest extends UnitTestCase
      */
     public function test_sync_nova_slozka_vytvori_projekt(): void
     {
-        mkdir($this->watchDir . '/Test projekt', 0755);
+        mkdir($this->watchDir . '/test-projekt', 0755);
 
         $service = new ProjectSyncService($this->projects, $this->watchDir);
         $result = $service->sync();
@@ -76,9 +76,9 @@ class ProjectSyncServiceTest extends UnitTestCase
         $this->assertEquals(0, $result['archived']);
         $this->assertEmpty($result['errors']);
 
-        $project = $this->projects->findByFolderPath('Test projekt');
+        $project = $this->projects->findByFolderPath('test-projekt');
         $this->assertNotNull($project);
-        $this->assertSame('Test projekt', $project['name']);
+        $this->assertSame('test-projekt', $project['name']);
         $this->assertSame('active', $project['status']);
     }
 
@@ -88,7 +88,7 @@ class ProjectSyncServiceTest extends UnitTestCase
     public function test_sync_ignoruje_skryte_slozky(): void
     {
         mkdir($this->watchDir . '/.hidden', 0755);
-        mkdir($this->watchDir . '/Viditelný', 0755);
+        mkdir($this->watchDir . '/viditelny', 0755);
 
         $service = new ProjectSyncService($this->projects, $this->watchDir);
         $result = $service->sync();
@@ -99,7 +99,7 @@ class ProjectSyncServiceTest extends UnitTestCase
         $hidden = $this->projects->findByFolderPath('.hidden');
         $this->assertNull($hidden);
 
-        $visible = $this->projects->findByFolderPath('Viditelný');
+        $visible = $this->projects->findByFolderPath('viditelny');
         $this->assertNotNull($visible);
     }
 
@@ -108,10 +108,10 @@ class ProjectSyncServiceTest extends UnitTestCase
      */
     public function test_sync_ignoruje_symlinky(): void
     {
-        mkdir($this->watchDir . '/Skutecny', 0755);
+        mkdir($this->watchDir . '/skutecny', 0755);
         // Vytvoř symlink na existující adresář
-        $target = $this->watchDir . '/Skutecny';
-        $link = $this->watchDir . '/Symlink';
+        $target = $this->watchDir . '/skutecny';
+        $link = $this->watchDir . '/symlink';
         @symlink($target, $link);
 
         $service = new ProjectSyncService($this->projects, $this->watchDir);
@@ -120,10 +120,10 @@ class ProjectSyncServiceTest extends UnitTestCase
         $this->assertEquals(1, $result['created']);
         $this->assertEmpty($result['errors']);
 
-        $symlinkProject = $this->projects->findByFolderPath('Symlink');
+        $symlinkProject = $this->projects->findByFolderPath('symlink');
         $this->assertNull($symlinkProject);
 
-        $realProject = $this->projects->findByFolderPath('Skutecny');
+        $realProject = $this->projects->findByFolderPath('skutecny');
         $this->assertNotNull($realProject);
     }
 
@@ -133,13 +133,13 @@ class ProjectSyncServiceTest extends UnitTestCase
     public function test_sync_smazana_slozka_archivuje_projekt(): void
     {
         // Adresář nesmí být prázdný (prázdný = detekce odpojeného disku)
-        mkdir($this->watchDir . '/Aktivni', 0755);
+        mkdir($this->watchDir . '/aktivni', 0755);
 
         // Vytvoř projekt v DB s folder_path, jehož složka na disku neexistuje
         $id = $this->projects->create([
-            'name'        => 'Smazany',
+            'name'        => 'smazany',
             'status'      => 'active',
-            'folder_path' => 'Smazany',
+            'folder_path' => 'smazany',
         ]);
 
         // Složka na disku neexistuje
@@ -159,7 +159,7 @@ class ProjectSyncServiceTest extends UnitTestCase
      */
     public function test_sync_druhe_volani_nevytvari_duplikaty(): void
     {
-        mkdir($this->watchDir . '/Projekt', 0755);
+        mkdir($this->watchDir . '/projekt', 0755);
 
         $service = new ProjectSyncService($this->projects, $this->watchDir);
 
@@ -193,11 +193,17 @@ class ProjectSyncServiceTest extends UnitTestCase
     {
         $service = new ProjectSyncService($this->projects, $this->watchDir);
 
-        // Validní názvy
-        $this->assertTrue($service->isValidFolderName('Projekt'));
-        $this->assertTrue($service->isValidFolderName('Můj projekt 2026'));
+        // Validní názvy - jen lowercase DNS hostname znaky
+        $this->assertTrue($service->isValidFolderName('projekt'));
+        $this->assertTrue($service->isValidFolderName('muj-projekt-2026'));
 
-        // Neplatné názvy
+        // Neplatné názvy - musí být validní hostname pro <nazev>.localhost
+        $this->assertFalse($service->isValidFolderName('Test projekt'));
+        $this->assertFalse($service->isValidFolderName('Viditelný'));
+        $this->assertFalse($service->isValidFolderName('UPPER'));
+        $this->assertFalse($service->isValidFolderName('pod_trzitko'));
+        $this->assertFalse($service->isValidFolderName('-zacatek'));
+        $this->assertFalse($service->isValidFolderName('konec-'));
         $this->assertFalse($service->isValidFolderName(''));
         $this->assertFalse($service->isValidFolderName('../etc'));
         $this->assertFalse($service->isValidFolderName('a/../b'));

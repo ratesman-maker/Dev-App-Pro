@@ -68,6 +68,13 @@ $includes = [];
 foreach ($projects as $project) {
     $folder = $project['folder_path'];
     $name = $project['name'];
+
+    // Obrana: nevalidní hostname by rozbil celý Apache config pro všechny projekty
+    if (!preg_match('/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/', $folder)) {
+        echo "Přeskočeno: {$folder} - název složky není validní hostname\n";
+        continue;
+    }
+
     $phpVersion = $project['php_version'] ?: $defaultPhp;
     $docRoot = PROJECTS_WATCH_DIR . '/' . $folder;
     $serverName = $folder . '.localhost';
@@ -144,7 +151,7 @@ VHOST;
         echo "Vygenerováno: {$serverName} (PHP {$phpVersion})\n";
     }
 
-    $includes[] = "Include {$projectsDir}/{$folder}.conf";
+    $includes[] = "Include \"{$projectsDir}/{$folder}.conf\"";
 }
 
 // Smazat zastaralé .conf soubory projektů, které se už negenerují
