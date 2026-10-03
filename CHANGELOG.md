@@ -16,6 +16,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 ## [Unreleased]
 
 ### Fixed
+- Přepínání PHP verzí: složka s nevalidním hostname (mezera, diakritika) rozbila Include v agregovaném Apache confu → configtest selhával → změna PHP verze i regenerace vhostů padaly pro všechny projekty. `isValidFolderName` nyní vyžaduje validní DNS hostname `[a-z0-9-]`, generátor vhostů nevalidní složky přeskočí a Include cesty jsou v uvozovkách
 - Mazání projektu: DB uživatel se smaže pro `@localhost` i `@127.0.0.1` (restore oba vytváří, `@127.0.0.1` dříve přežíval jako osiřelý); výstup regenerace vhostů se loguje
 - Restore worker: výstup generátoru vhostů se loguje a ověřuje se existence vhost souboru; selhání `wp plugin list` loguje varování místo tichého přeskočení deaktivace problematických pluginů; před stavem `completed` se provede HTTP health check obnoveného webu
 - URL replace při restore i v `cli/search-replace-db.php` nově pokrývá i JSON-escapované varianty URL (`http:\/\/`), které Kadence/Colibri ukládají do serializovaných option blobů — dříve po restore zůstávaly `http://` odkazy na původní doménu → mixed content a varování "spojení není bezpečné" v prohlížeči
