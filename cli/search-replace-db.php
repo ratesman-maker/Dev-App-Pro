@@ -49,7 +49,7 @@ function serializeAwareReplace(string $data, array $replacements): string
     }
 
     // Zkusit PHP unserialize - pokud je serializované, rekurzivně nahradit
-    $unserialized = @unserialize($data);
+    $unserialized = @unserialize($data, ['allowed_classes' => false]);
     if ($unserialized !== false || $data === 'b:0;') {
         $replaced = recursiveReplace($unserialized, $replacements);
         $result = serialize($replaced);

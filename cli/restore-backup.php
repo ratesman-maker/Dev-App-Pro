@@ -285,8 +285,9 @@ function serializeAwareReplace(string $data, array $replacements): string
     // Zkusit PHP unserialize - pokud je serializované, rekurzivně nahradit
     // Pozor: globální error handler v bootstrap.php převádí i @-potlačená
     // varování na ErrorException, proto try/catch místo pouhého @.
+    // allowed_classes=false: data pocházejí z cizích WP dumpů (object injection)
     try {
-        $unserialized = @unserialize($data);
+        $unserialized = @unserialize($data, ['allowed_classes' => false]);
     } catch (\Throwable) {
         $unserialized = false;
     }
