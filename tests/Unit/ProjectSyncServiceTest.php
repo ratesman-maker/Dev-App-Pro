@@ -173,6 +173,41 @@ class ProjectSyncServiceTest extends UnitTestCase
     }
 
     /**
+     * Detekce typu projektu: wordpress > php > static > null.
+     */
+    public function test_detect_type(): void
+    {
+        $service = new ProjectSyncService($this->projects, $this->watchDir);
+
+        // WordPress
+        $wp = $this->watchDir . '/wp-site';
+        mkdir($wp, 0755);
+        file_put_contents($wp . '/wp-config.php', '<?php');
+        $this->assertSame('wordpress', $service->detectType($wp));
+
+        // PHP (index.php, ne WP)
+        $php = $this->watchDir . '/php-site';
+        mkdir($php, 0755);
+        file_put_contents($php . '/index.php', '<?php');
+        $this->assertSame('php', $service->detectType($php));
+
+        // PHP i když má index.html vedle (index.php má přednost)
+        file_put_contents($php . '/index.html', '<html>');
+        $this->assertSame('php', $service->detectType($php));
+
+        // Static (jen HTML)
+        $static = $this->watchDir . '/static-site';
+        mkdir($static, 0755);
+        file_put_contents($static . '/index.html', '<html>');
+        $this->assertSame('static', $service->detectType($static));
+
+        // Null (nic poznatelného)
+        $empty = $this->watchDir . '/empty-site';
+        mkdir($empty, 0755);
+        $this->assertNull($service->detectType($empty));
+    }
+
+    /**
      * Neexistující adresář → vrátí error.
      */
     public function test_sync_neexistujici_adresar_vrati_error(): void
