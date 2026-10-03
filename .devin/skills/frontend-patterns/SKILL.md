@@ -77,7 +77,14 @@ components/ui/PageSkeleton.tsx — loading stav stránky
 
 ## A11y a detail
 
+Priorita podle dopadu: 1) accessible names, 2) keyboard access, 3) focus/dialogy, 4) sémantika.
+
 - [ ] `label` u každého inputu (shadcn `Label`), `htmlFor` spárovaný
+- [ ] **Icon-only tlačítka = povinný `aria-label`** (např. theme toggle, zavírací křížek)
+- [ ] **Dialogy/focus:** Radix `Dialog` už řeší focus trap + Escape — nebudovat ručně; po zavření vrátit focus na trigger
+- [ ] Chyby formuláře inline u pole + `role="alert"`/`aria-describedby`, ne jen barevný text
+- [ ] Klávesnice: Tab/Enter/Escape musí fungovat bez myši na všech interaktivních prvcích; viditelný focus ring (`focus-visible`)
+- [ ] Kontrast text↔pozadí v obou režimech (dark default, ale light testovat)
 - [ ] Disabled tlačítka s `title`/tooltip důvodem (vzor: generování SSL během hosting jobu)
 - [ ] Klikatelné řádky tabulky → detail (vzor Dashboard/Clients)
 - [ ] Dark mode default (`class="dark"` v index.html) — nové komponenty testovat i v dark
