@@ -180,6 +180,9 @@ export default function ProjectsPage() {
         if (type === 'static') {
           return <Badge variant="outline">Static</Badge>;
         }
+        if (type === 'php') {
+          return <Badge variant="secondary">PHP</Badge>;
+        }
         return <span className="text-muted-foreground">—</span>;
       },
     },
@@ -189,7 +192,7 @@ export default function ProjectsPage() {
       enableSorting: false,
       cell: ({ row }) => {
         const p = row.original;
-        if (!p.folder_path) {
+        if (!p.folder_path || p.type === 'static') {
           return <span className="text-muted-foreground">—</span>;
         }
         const current = currentPhpVersion(p);

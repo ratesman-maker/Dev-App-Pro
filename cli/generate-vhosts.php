@@ -92,9 +92,25 @@ foreach ($projects as $project) {
         ? 'index.php index.html'
         : 'index.html index.php';
 
+    // FPM direktivy jen pro PHP-projekty (wordpress/php) - statické weby PHP nepotřebují
+    $phpBlock = '';
+    if ($project['type'] !== 'static') {
+        $phpBlock = <<<FPM
+
+    <FilesMatch \.php$>
+        SetHandler "proxy:unix:{$fpmSocket}|fcgi://localhost"
+    </FilesMatch>
+    ProxyPassMatch "^/(.*\.php(/.*)?)$" "unix:{$fpmSocket}|fcgi://localhost{$docRoot}/\$1"
+FPM;
+    }
+
+    $phpInfo = $project['type'] === 'static'
+        ? '# Staticky web (bez PHP-FPM)'
+        : "# PHP: {$phpVersion} ({$fpmSocket})";
+
     $vhost = <<<VHOST
 # Auto-generováno Dev App Pro - projekt: {$name}
-# PHP: {$phpVersion} ({$fpmSocket})
+{$phpInfo}
 # NEUPRAVOVAT RUČNĚ - změny se přepíší
 
 <VirtualHost *:80>
@@ -108,10 +124,7 @@ foreach ($projects as $project) {
         DirectoryIndex {$directoryIndex}
     </Directory>
 
-    <FilesMatch \.php$>
-        SetHandler "proxy:unix:{$fpmSocket}|fcgi://localhost"
-    </FilesMatch>
-    ProxyPassMatch "^/(.*\.php(/.*)?)$" "unix:{$fpmSocket}|fcgi://localhost{$docRoot}/\$1"
+{$phpBlock}
 
 </VirtualHost>
 
@@ -130,10 +143,7 @@ foreach ($projects as $project) {
         DirectoryIndex {$directoryIndex}
     </Directory>
 
-    <FilesMatch \.php$>
-        SetHandler "proxy:unix:{$fpmSocket}|fcgi://localhost"
-    </FilesMatch>
-    ProxyPassMatch "^/(.*\.php(/.*)?)$" "unix:{$fpmSocket}|fcgi://localhost{$docRoot}/\$1"
+{$phpBlock}
 
 </VirtualHost>
 VHOST;

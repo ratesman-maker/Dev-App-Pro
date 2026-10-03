@@ -140,9 +140,11 @@ class ProjectSyncService
                     // Queue hosting job pro regeneraci vhostů a SSL
                     $this->queueHostingJob((int) $existing['id'], 'update', $entry);
                 }
-                // Aktualizuj typ pokud byl null a teď jsme detekovali
-                if ($existing['type'] === null && $projectType !== null) {
+                // Aktualizuj typ pokud se změnil (např. přibyl index.php do statického webu)
+                if ($projectType !== null && $existing['type'] !== $projectType) {
                     $this->projects->update((int) $existing['id'], ['type' => $projectType]);
+                    // Regenerovat vhost - static nemá FPM bloky, php/wordpress ano
+                    $this->queueHostingJob((int) $existing['id'], 'update', $entry);
                 }
             }
         }
@@ -208,13 +210,17 @@ class ProjectSyncService
     /**
      * Detekuje typ projektu podle obsahu složky.
      * - WordPress: obsahuje wp-config.php nebo wp-login.php
-     * - Static: obsahuje index.html (a ne wp-config.php)
+     * - PHP: obsahuje index.php nebo jakýkoliv .php v kořenu (a není WordPress)
+     * - Static: obsahuje index.html (a žádné .php)
      * - null: nelze určit
      */
     public function detectType(string $fullPath): ?string
     {
         if (is_file($fullPath . '/wp-config.php') || is_file($fullPath . '/wp-login.php')) {
             return 'wordpress';
+        }
+        if (is_file($fullPath . '/index.php') || (glob($fullPath . '/*.php') ?: []) !== []) {
+            return 'php';
         }
         if (is_file($fullPath . '/index.html') || is_file($fullPath . '/index.htm')) {
             return 'static';

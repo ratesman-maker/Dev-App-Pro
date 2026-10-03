@@ -220,6 +220,11 @@ class ProjectApiController extends ApiController
             return;
         }
 
+        if (!in_array($project['type'] ?? '', ['wordpress', 'php'], true)) {
+            $this->jsonError('Přepnutí PHP verze je dostupné jen pro PHP projekty (wordpress/php).', 422);
+            return;
+        }
+
         $input = json_input();
         $version = $input['php_version'] ?? '';
 
