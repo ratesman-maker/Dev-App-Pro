@@ -23,6 +23,16 @@ Cílem je poskytnout rodičovskému agentovi kontext o stávajícím stavu, konv
 3. **Mapuješ závislosti** - co na čem závisí, co se nesmí rozbít
 4. **Hledáš duplikace** - Rule of Three, sdílené funkce
 5. **Ověřuješ konzistenci** - DB schema vs API vs frontend typy
+6. **Hledáš existující řešení** - než se něco napíše od nuly: sdílené funkce v repu (`helpers.php`, `lib/utils.ts`), composer/npm balíčky, web_search pro osvědčené knihovny
+
+### Rozhodovací matice (existující řešení vs vlastní kód)
+
+| Signál | Akce |
+|---|---|
+| Řešení už v repu (helper, sdílená komponenta) | **Reuse** - neduplikovat |
+| Udržovaný balíček, přesná shoda potřeby | **Adopt** - composer/npm, thin wrapper |
+| Částečná shoda, dobrý základ | **Extend** - balíček + malá vlastní vrstva |
+| Nic vhodného | **Build** - vlastní kód, ale informovaný rešerší |
 
 ## Pravidla projektu
 
