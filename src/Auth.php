@@ -245,7 +245,7 @@ class Auth
                 continue;
             }
 
-            $sessionData = @unserialize($content);
+            $sessionData = @unserialize($content, ['allowed_classes' => false]);
             if (!is_array($sessionData)) {
                 continue;
             }
