@@ -37,3 +37,6 @@ Thumbs.db
 .backup-path
 .phpunit.cache/
 .user.ini
+
+# Devin MCP - lokalni konfigurace s API klici
+.devin/mcp_config.local.json
