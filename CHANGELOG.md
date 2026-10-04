@@ -24,6 +24,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 - Skill `.devin/skills/gha-security-review/` — audit GitHub Actions proti pwn request, expression injection a supply-chain; `tests.yml` má nyní `permissions: contents: read` (GITHUB_TOKEN nesmí mít write, který nepotřebuje)
 - A11y pravidla ve `frontend-patterns`: povinný `aria-label` u icon-only tlačítek, `role="alert"` u inline chyb, klávesnicová navigace a focus handling
 - Skill `.devin/skills/shadcn/` — adaptace oficiálního shadcn-ui skillu (CLI workflow, sémantické barvy, kompozice) navázaná na projektovou sadu komponent; `frontend-patterns` rozšířen o React výkonnostní pravidla distillovaná z Vercel react-best-practices (waterfalls, re-rendery, bundle)
+- Skill `.devin/skills/e2e-testing/` — konvence pro psaní a rozšiřování Playwright speců (architektura, `devapppro_test` guard, role-based selektory, `page.route` mockování, `test.step`, debug tooling)
 
 ### Security
 - `unserialize()` nyní voláno s `allowed_classes => false` u nedůvěryhodných dat (serializované bloby z WP dumpů v restore/search-replace, session soubory) — zamezuje PHP object injection
