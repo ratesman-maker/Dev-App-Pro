@@ -15,6 +15,9 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ## [Unreleased]
 
+### Changed
+- Sync projektů ignoruje složku `fitness-denik` (není webový projekt)
+
 ### Added
 - Playwright E2E testy (`bin/test.sh e2e`): 9 speců (login, chybné heslo, redirect nepřihlášeného, nástěnka, Projekty/Úkoly/Klienti, 404) proti `php -S` na `devapppro_test` — pokrývá SPA regrese, které API testy nevidí; běží v CI
 - Statický security scan `bin/security-scan.sh` — 13 kontrol (tracked secrets, SQL interpolace, shell exec bez escapeshellarg, nebezpečné funkce, composer/npm audit, perms, .htaccess, CSRF coverage); exit 1 při CRITICAL, `--strict` i při WARNING
