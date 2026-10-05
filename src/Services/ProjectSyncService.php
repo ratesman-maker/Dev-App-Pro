@@ -96,7 +96,7 @@ class ProjectSyncService
             }
 
             // Ignoruj systémové složky (Windows/exFAT) a složky, které nejsou webové projekty
-            if (in_array($entry, ['$RECYCLE.BIN', 'System Volume Information', '.devin', 'Zalohy', 'Podklady', 'Dorsen', 'webspecialistacz', 'certs', 'devapppro', 'test', 'knowledge-base', 'Knowledge Base'], true)) {
+            if (in_array($entry, ['$RECYCLE.BIN', 'System Volume Information', '.devin', 'Zalohy', 'Podklady', 'Dorsen', 'webspecialistacz', 'certs', 'devapppro', 'test', 'knowledge-base', 'Knowledge Base', 'fitness-denik'], true)) {
                 continue;
             }
 
