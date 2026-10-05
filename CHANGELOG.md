@@ -18,6 +18,10 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 ### Changed
 - Sync projektů ignoruje složku `fitness-denik` (není webový projekt)
 
+### Fixed
+- `projects.type` enum rozšířen o `'php'` (migration_017) — jinak sync padal na `Data truncated` a celá synchronizace včetně dokončení restore se zastavila
+- Bootstrap error logger: `restore_error_handler()` před zápisem do error.log — CLI spuštěné jako `ratesman` nepadá na právech souboru a výjimka se vypíše na STDERR
+
 ### Added
 - Playwright E2E testy (`bin/test.sh e2e`): 9 speců (login, chybné heslo, redirect nepřihlášeného, nástěnka, Projekty/Úkoly/Klienti, 404) proti `php -S` na `devapppro_test` — pokrývá SPA regrese, které API testy nevidí; běží v CI
 - Statický security scan `bin/security-scan.sh` — 13 kontrol (tracked secrets, SQL interpolace, shell exec bez escapeshellarg, nebezpečné funkce, composer/npm audit, perms, .htaccess, CSRF coverage); exit 1 při CRITICAL, `--strict` i při WARNING
