@@ -25,7 +25,13 @@ set_exception_handler(function (\Throwable $e): void {
         $e->getLine(),
         $e->getTraceAsString()
     );
-    @file_put_contents('/var/log/devapppro/error.log', $logMsg, FILE_APPEND | LOCK_EX);
+    // Logger nesmí shodit exception handler - vypnout error handler,
+    // aby @ skutečně potlačilo warning (jinak ErrorException uvnitř handleru = fatal)
+    $logFile = '/var/log/devapppro/error.log';
+    restore_error_handler();
+    if (@file_put_contents($logFile, $logMsg, FILE_APPEND | LOCK_EX) === false && PHP_SAPI === 'cli') {
+        fwrite(STDERR, $logMsg);
+    }
 
     // Pokud ještě nebyl odeslán HTTP hlavičky, odešli 500
     if (!headers_sent()) {

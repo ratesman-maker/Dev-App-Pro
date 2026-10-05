@@ -111,7 +111,7 @@ CREATE TABLE `projects` (
     `name` VARCHAR(200) NOT NULL,
     `description` TEXT NULL DEFAULT NULL,
     `status` ENUM('active','on_hold','completed','cancelled','archived') NOT NULL DEFAULT 'active',
-    `type` ENUM('static','wordpress') NULL DEFAULT NULL,
+    `type` ENUM('static','wordpress','php') NULL DEFAULT NULL,
     `php_version` VARCHAR(10) NULL DEFAULT NULL,
     `folder_path` VARCHAR(500) NULL DEFAULT NULL,
     `budget_cents` INT UNSIGNED NOT NULL DEFAULT 0,
