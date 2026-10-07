@@ -94,6 +94,22 @@ export default function ClientsPage() {
       },
     },
     {
+      accessorKey: 'contact_name',
+      header: 'Zástupce',
+      enableSorting: false,
+      cell: ({ row }) => {
+        const c = row.original;
+        if (!c.contact_name && !c.contact_email && !c.contact_phone) return '—';
+        const contact = [c.contact_email, c.contact_phone].filter(Boolean).join(' · ');
+        return (
+          <div className="flex flex-col">
+            <span>{c.contact_name}</span>
+            {contact ? <span className="text-xs text-muted-foreground">{contact}</span> : null}
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: 'ico',
       header: 'IČO',
       enableSorting: false,
