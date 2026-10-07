@@ -24,6 +24,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 - Bootstrap error logger: `restore_error_handler()` před zápisem do error.log — CLI spuštěné jako `ratesman` nepadá na právech souboru a výjimka se vypíše na STDERR
 
 ### Added
+- Sloupec "Zástupce" v tabulce klientů — u organizací jméno kontaktní osoby + její e-mail/telefon na druhém řádku
 - Kontaktní osoba (zástupce) u organizací — `clients.contact_name/contact_email/contact_phone` (migration_019); formulář ukazuje sekci jen u firem/nezisku/státní správy, search prohledává zástupce, detail klienta ho zobrazuje
 - Playwright E2E testy (`bin/test.sh e2e`): 9 speců (login, chybné heslo, redirect nepřihlášeného, nástěnka, Projekty/Úkoly/Klienti, 404) proti `php -S` na `devapppro_test` — pokrývá SPA regrese, které API testy nevidí; běží v CI
 - Statický security scan `bin/security-scan.sh` — 13 kontrol (tracked secrets, SQL interpolace, shell exec bez escapeshellarg, nebezpečné funkce, composer/npm audit, perms, .htaccess, CSRF coverage); exit 1 při CRITICAL, `--strict` i při WARNING
