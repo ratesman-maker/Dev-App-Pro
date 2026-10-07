@@ -19,6 +19,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 - Sync projektů ignoruje složku `fitness-denik` (není webový projekt)
 
 ### Fixed
+- `clients.type` a `company_profile.type` enumy rozšířeny o `'nonprofit'` a `'government'` (migration_018) — výběr typu Neziskový/Státní správa v dialogu klienta i firemního profilu končil HTTP 500 na `Data truncated`
 - `projects.type` enum rozšířen o `'php'` (migration_017) — jinak sync padal na `Data truncated` a celá synchronizace včetně dokončení restore se zastavila
 - Bootstrap error logger: `restore_error_handler()` před zápisem do error.log — CLI spuštěné jako `ratesman` nepadá na právech souboru a výjimka se vypíše na STDERR
 
