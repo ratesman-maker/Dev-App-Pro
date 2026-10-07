@@ -9,7 +9,7 @@ use DevAppPro\Tests\UnitTestCase;
 /**
  * Unit testy pro AclService::normalizeProjectTree.
  * Regrese: soubory vytvořené s mkdir 0755/chmod 0644 oříznou ACL masku
- * → www-data/ratesman ztratí zápis → selhávají WP updaty (viz fix.md).
+ * → www-data/ratesman ztratí zápis → selhávají WP updaty (viz docs/acl-masky-projekty.md).
  * @group projects
  */
 class AclServiceTest extends UnitTestCase
