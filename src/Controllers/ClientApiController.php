@@ -206,13 +206,17 @@ class ClientApiController extends ApiController
 
         // Trim všech textových polí
         $textFields = [
-            'first_name', 'last_name', 'company_name', 'ico', 'dic',
+            'first_name', 'last_name', 'company_name', 'contact_name',
+            'contact_email', 'contact_phone', 'ico', 'dic',
             'bank_account', 'email', 'phone', 'address', 'note',
         ];
         $fieldLimits = [
             'first_name'    => 100,
             'last_name'     => 100,
             'company_name'  => 200,
+            'contact_name'  => 200,
+            'contact_email' => 255,
+            'contact_phone' => 100,
             'ico'           => 50,
             'dic'           => 50,
             'bank_account'  => 50,
@@ -246,8 +250,11 @@ class ClientApiController extends ApiController
                 $fields['last_name'] = 'Příjmení je povinné.';
             }
             // company_name ignorováno → NULL (OSVČ fakturuje pod jménem);
-            // ico/dic/bank_account povoleny — většina osob jsou OSVČ
+            // zástupce nemá smysl — osoba je sama kontaktem
             $data['company_name'] = null;
+            $data['contact_name'] = null;
+            $data['contact_email'] = null;
+            $data['contact_phone'] = null;
         } else {
             // company / nonprofit / government → company_name povinné
             if ($data['company_name'] === null) {
@@ -282,6 +289,13 @@ class ClientApiController extends ApiController
         if ($data['email'] !== null) {
             if (filter_var($data['email'], FILTER_VALIDATE_EMAIL) === false) {
                 $fields['email'] = 'E-mail není platný.';
+            }
+        }
+
+        // E-mail zástupce: platný formát (pokud zadáno)
+        if ($data['contact_email'] !== null) {
+            if (filter_var($data['contact_email'], FILTER_VALIDATE_EMAIL) === false) {
+                $fields['contact_email'] = 'E-mail zástupce není platný.';
             }
         }
 

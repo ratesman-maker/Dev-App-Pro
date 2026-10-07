@@ -314,10 +314,15 @@ export function ClientDetailModal({ open, onClose, clientId }: ClientDetailModal
                   value={`${client.first_name ?? ''} ${client.last_name ?? ''}`.trim()}
                 />
               ) : (
-                <DetailRow
-                  label={client.type === 'government' ? 'Název úřadu' : 'Název organizace'}
-                  value={client.company_name}
-                />
+                <>
+                  <DetailRow
+                    label={client.type === 'government' ? 'Název úřadu' : 'Název organizace'}
+                    value={client.company_name}
+                  />
+                  <DetailRow label="Zástupce" value={client.contact_name} />
+                  <DetailRow label="E-mail zástupce" value={<EmailLink email={client.contact_email} />} />
+                  <DetailRow label="Telefon zástupce" value={<PhoneLink phone={client.contact_phone} />} />
+                </>
               )}
               <DetailRow label="IČO" value={client.ico} />
               <DetailRow label="DIČ" value={client.dic} />
