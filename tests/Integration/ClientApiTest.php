@@ -93,6 +93,32 @@ class ClientApiTest extends TestCase
     }
 
     /**
+     * Login, POST nonprofit + government → 201.
+     * Regrese: enum clients.type tyto hodnoty musí přijmout (dřív 500).
+     */
+    public function test_vytvoreni_ostatnich_typu(): void
+    {
+        $this->login();
+
+        foreach (['nonprofit' => 'Spolek abc', 'government' => 'Městský úřad'] as $type => $name) {
+            $response = $this->http->post('/api/clients', [
+                'json' => [
+                    'type'         => $type,
+                    'company_name' => $name,
+                ],
+                'headers' => [
+                    'X-CSRF-Token' => $this->csrfToken,
+                ],
+            ]);
+
+            $this->assertEquals(201, $response->getStatusCode(), "type={$type}");
+            $body = json_decode((string) $response->getBody(), true);
+            $this->assertSame($type, $body['type']);
+            $this->assertSame($name, $body['full_name']);
+        }
+    }
+
+    /**
      * POST osoba bez příjmení → 422, fields obsahuje last_name.
      */
     public function test_osoba_bez_prijmeni_vrati_422(): void
