@@ -20,6 +20,9 @@ class ClientRepository extends Repository
         'first_name',
         'last_name',
         'company_name',
+        'contact_name',
+        'contact_email',
+        'contact_phone',
         'ico',
         'dic',
         'bank_account',
@@ -69,9 +72,9 @@ class ClientRepository extends Repository
         $where = '';
         $params = [];
         if ($search !== '') {
-            $where = ' WHERE (`first_name` LIKE ? OR `last_name` LIKE ? OR `company_name` LIKE ? OR `email` LIKE ?)';
+            $where = ' WHERE (`first_name` LIKE ? OR `last_name` LIKE ? OR `company_name` LIKE ? OR `contact_name` LIKE ? OR `email` LIKE ? OR `contact_email` LIKE ?)';
             $like = '%' . $search . '%';
-            $params = [$like, $like, $like, $like];
+            $params = [$like, $like, $like, $like, $like, $like];
         }
 
         // Počet záznamů

@@ -9,6 +9,9 @@ export interface Client {
   first_name: string | null;
   last_name: string | null;
   company_name: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
   full_name: string;
   ico: string | null;
   dic: string | null;
@@ -26,6 +29,9 @@ export interface ClientInput {
   first_name?: string | null;
   last_name?: string | null;
   company_name?: string | null;
+  contact_name?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
   ico?: string | null;
   dic?: string | null;
   bank_account?: string | null;

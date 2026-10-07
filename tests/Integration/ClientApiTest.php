@@ -119,6 +119,75 @@ class ClientApiTest extends TestCase
     }
 
     /**
+     * POST firma se zástupcem → 201, contact_* uloženy.
+     * POST osoba se zástupcem → contact_* se ignorují (osoba = kontakt).
+     */
+    public function test_zastupce_u_organizace(): void
+    {
+        $this->login();
+
+        $response = $this->http->post('/api/clients', [
+            'json' => [
+                'type'          => 'company',
+                'company_name'  => 'Novák s.r.o.',
+                'contact_name'  => 'Petr Zástupný',
+                'contact_email' => 'petr@novak.cz',
+                'contact_phone' => '+420777111222',
+            ],
+            'headers' => [
+                'X-CSRF-Token' => $this->csrfToken,
+            ],
+        ]);
+
+        $this->assertEquals(201, $response->getStatusCode());
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertSame('Petr Zástupný', $body['contact_name']);
+        $this->assertSame('petr@novak.cz', $body['contact_email']);
+        $this->assertSame('+420777111222', $body['contact_phone']);
+
+        $response = $this->http->post('/api/clients', [
+            'json' => [
+                'type'          => 'individual',
+                'first_name'    => 'Jan',
+                'last_name'     => 'Novák',
+                'contact_name'  => 'Nemá být',
+                'contact_email' => 'x@y.cz',
+            ],
+            'headers' => [
+                'X-CSRF-Token' => $this->csrfToken,
+            ],
+        ]);
+
+        $this->assertEquals(201, $response->getStatusCode());
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertNull($body['contact_name']);
+        $this->assertNull($body['contact_email']);
+    }
+
+    /**
+     * POST firma s neplatným e-mailem zástupce → 422.
+     */
+    public function test_neplatny_email_zastupce_vrati_422(): void
+    {
+        $this->login();
+
+        $response = $this->http->post('/api/clients', [
+            'json' => [
+                'type'          => 'company',
+                'company_name'  => 'X',
+                'contact_email' => 'neplatny',
+            ],
+            'headers' => [
+                'X-CSRF-Token' => $this->csrfToken,
+            ],
+        ]);
+
+        $this->assertEquals(422, $response->getStatusCode());
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertArrayHasKey('contact_email', $body['fields']);
+    }
+
+    /**
      * POST osoba bez příjmení → 422, fields obsahuje last_name.
      */
     public function test_osoba_bez_prijmeni_vrati_422(): void

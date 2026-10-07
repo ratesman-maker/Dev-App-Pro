@@ -18,6 +18,9 @@ const emptyForm: ClientInput = {
   first_name: '',
   last_name: '',
   company_name: '',
+  contact_name: '',
+  contact_email: '',
+  contact_phone: '',
   ico: '',
   dic: '',
   bank_account: '',
@@ -54,6 +57,9 @@ export function ClientFormDialog({ open, onClose, client }: ClientFormDialogProp
           first_name: client.first_name ?? '',
           last_name: client.last_name ?? '',
           company_name: client.company_name ?? '',
+          contact_name: client.contact_name ?? '',
+          contact_email: client.contact_email ?? '',
+          contact_phone: client.contact_phone ?? '',
           ico: client.ico ?? '',
           dic: client.dic ?? '',
           bank_account: client.bank_account ?? '',
@@ -77,8 +83,11 @@ export function ClientFormDialog({ open, onClose, client }: ClientFormDialogProp
     setForm((prev) => {
       const next = { ...prev, type: newType };
       if (newType === 'individual') {
-        // Přepnutí na osobu - vyčistit název firmy (ico/dic nechat, OSVČ je používá)
+        // Přepnutí na osobu - vyčistit název firmy a zástupce (osoba je sama kontaktem)
         next.company_name = '';
+        next.contact_name = '';
+        next.contact_email = '';
+        next.contact_phone = '';
       } else {
         // Přepnutí na organizaci - vyčistit jméno/příjmení
         next.first_name = '';
@@ -185,6 +194,45 @@ export function ClientFormDialog({ open, onClose, client }: ClientFormDialogProp
               {errors.company_name && <p className="text-xs text-destructive">{errors.company_name}</p>}
             </div>
           </div>
+        )}
+
+        {/* Zástupce — jen pro organizace (jednání probíhá s kontaktní osobou) */}
+        {form.type !== 'individual' && (
+          <fieldset className="space-y-4 rounded-md border border-border p-3">
+            <legend className="px-1 text-xs font-medium text-muted-foreground">
+              Kontaktní osoba (zástupce)
+            </legend>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="contact_name">Jméno zástupce</Label>
+                <Input
+                  id="contact_name"
+                  value={form.contact_name ?? ''}
+                  onChange={(e) => update('contact_name', e.target.value)}
+                />
+                {errors.contact_name && <p className="text-xs text-destructive">{errors.contact_name}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="contact_email">E-mail zástupce</Label>
+                <Input
+                  id="contact_email"
+                  type="email"
+                  value={form.contact_email ?? ''}
+                  onChange={(e) => update('contact_email', e.target.value)}
+                />
+                {errors.contact_email && <p className="text-xs text-destructive">{errors.contact_email}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="contact_phone">Telefon zástupce</Label>
+                <Input
+                  id="contact_phone"
+                  value={form.contact_phone ?? ''}
+                  onChange={(e) => update('contact_phone', e.target.value)}
+                />
+                {errors.contact_phone && <p className="text-xs text-destructive">{errors.contact_phone}</p>}
+              </div>
+            </div>
+          </fieldset>
         )}
 
         {/* IČO/DIČ/bankovní účet — pro všechny typy (osoby = OSVČ) */}
