@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 // Načtení konfigurace (bez bootstrapu - nepotřebujeme session)
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../src/Services/AclService.php';
 $dbConfig = require __DIR__ . '/../config/database.php';
 
 const LOG_FILE = '/var/log/devapppro-wp-install.log';
@@ -408,6 +409,16 @@ function doInstall(int $id): int
             throw new RuntimeException("wp core install selhal: {$result['output']}");
         }
         logMsg("WordPress instalace dokončena přes wp-cli (admin: {$adminUser})");
+
+        // Krok 6b: normalizace ACL - soubory vytvořené root workerem (mkdir 0755,
+        // umask 022) mají oříznutou ACL masku → www-data/ratesman ztratí zápis
+        // a WP updaty selžou. Selhání jen logovat, instalaci neshodit.
+        $acl = \DevAppPro\Services\AclService::normalizeProjectTree($validatedRoot);
+        if ($acl['ok']) {
+            logMsg("ACL normalizováno (www-data, ratesman rwX)");
+        } else {
+            logMsg("VAROVÁNÍ: ACL normalizace selhala: {$acl['message']}");
+        }
 
         // Krok 7: completed - zjištění verze WordPress
         $versionFile = $validatedRoot . '/wp-includes/version.php';

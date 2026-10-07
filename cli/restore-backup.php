@@ -22,6 +22,7 @@ require_once __DIR__ . '/../src/Libs/autoload.php';
 
 use DevAppPro\Repositories\BackupRestoreRepository;
 use DevAppPro\Repositories\ProjectRepository;
+use DevAppPro\Services\AclService;
 use DevAppPro\Services\ProjectSyncService;
 use Duplicator\Libs\DupArchive\DupArchiveExpandBasicEngine;
 
@@ -828,6 +829,16 @@ HTACCESS;
         logMsg("Health check OK: https://{$projectName}.localhost/ vrací HTTP {$healthCode}");
     } else {
         logMsg("VAROVÁNÍ: health check selhal - https://{$projectName}.localhost/ vrací HTTP '{$healthCode}'");
+    }
+
+    // 8f. Normalizace ACL - soubory vytvořené root workerem s umask 022
+    // (mkdir 0755, chmod 0644) mají oříznutou ACL masku na r-x/r-- → www-data
+    // a ratesman ztratí zápis a WP updaty selhávají. Selhání jen logovat.
+    $acl = AclService::normalizeProjectTree($targetRoot);
+    if ($acl['ok']) {
+        logMsg("ACL normalizováno (www-data, ratesman rwX)");
+    } else {
+        logMsg("VAROVÁNÍ: ACL normalizace selhala: {$acl['message']}");
     }
 
     // 9. Completed
