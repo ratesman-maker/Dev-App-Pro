@@ -30,7 +30,7 @@ CREATE TABLE `users` (
 DROP TABLE IF EXISTS `company_profile`;
 CREATE TABLE `company_profile` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `type` ENUM('individual','company') NOT NULL DEFAULT 'individual',
+    `type` ENUM('individual','company','nonprofit','government') NOT NULL DEFAULT 'individual',
     `first_name` VARCHAR(100) NULL DEFAULT NULL,
     `last_name` VARCHAR(100) NULL DEFAULT NULL,
     `company_name` VARCHAR(200) NULL DEFAULT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE `login_attempts` (
 DROP TABLE IF EXISTS `clients`;
 CREATE TABLE `clients` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `type` ENUM('individual','company') NOT NULL DEFAULT 'individual',
+    `type` ENUM('individual','company','nonprofit','government') NOT NULL DEFAULT 'individual',
     `first_name` VARCHAR(100) NULL DEFAULT NULL,
     `last_name` VARCHAR(100) NULL DEFAULT NULL,
     `company_name` VARCHAR(200) NULL DEFAULT NULL,
