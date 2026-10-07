@@ -19,6 +19,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 - Sync projektů ignoruje složku `fitness-denik` (není webový projekt)
 
 ### Fixed
+- ACL masky projektových stromů — root workery (restore, WP instalace) i www-data při updatech vytvářely soubory s maskou oříznutou na `r-x`/`r--`, takže WP core/plugin aktualizace selhávaly; nová `AclService::normalizeProjectTree` se volá na konci restore i instalace a denní cron `cli/normalize-project-acls.php` normalizaci drží trvale
 - `clients.type` a `company_profile.type` enumy rozšířeny o `'nonprofit'` a `'government'` (migration_018) — výběr typu Neziskový/Státní správa v dialogu klienta i firemního profilu končil HTTP 500 na `Data truncated`
 - `projects.type` enum rozšířen o `'php'` (migration_017) — jinak sync padal na `Data truncated` a celá synchronizace včetně dokončení restore se zastavila
 - Bootstrap error logger: `restore_error_handler()` před zápisem do error.log — CLI spuštěné jako `ratesman` nepadá na právech souboru a výjimka se vypíše na STDERR
