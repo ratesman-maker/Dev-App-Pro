@@ -203,6 +203,10 @@ export function InvoiceDetailModal({ open, onClose, invoiceId }: InvoiceDetailMo
               <DetailRow label="Konstantní symbol" value={invoice.constant_symbol} />
               <DetailRow label="IBAN" value={invoice.iban} />
               <DetailRow label="Poznámka" value={invoice.note} />
+              <DetailRow
+                label="Archivní PDF"
+                value={invoice.frozen_pdf ? 'Zmrazená kopie vydané faktury' : null}
+              />
               <DetailRow label="Vytvořeno" value={fmtDateTime(invoice.created_at)} />
               {invoice.items?.length > 0 && (
                 <div className="py-2">

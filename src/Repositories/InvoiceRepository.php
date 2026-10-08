@@ -279,6 +279,16 @@ class InvoiceRepository extends Repository
     }
 
     /**
+     * Uloží cestu ke zmrazenému PDF (archivní kopie vydané faktury).
+     * Interní sloupec — není součástí ALLOWED_COLUMNS, uživatel ho nemůže měnit.
+     */
+    public function setFrozenPdf(int $id, ?string $path): bool
+    {
+        $stmt = $this->pdo->prepare("UPDATE `{$this->table}` SET `frozen_pdf` = ? WHERE `id` = ?");
+        return $stmt->execute([$path, $id]);
+    }
+
+    /**
      * Přepočítá paid_cents faktury z invoice_payments a případně změní status.
      * - Pokud paid_cents >= amount_cents a status != 'cancelled' → status='paid'
      */

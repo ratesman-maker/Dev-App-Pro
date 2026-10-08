@@ -37,6 +37,7 @@ export interface Invoice {
   due_date: string;
   taxable_date: string | null;
   note: string | null;
+  frozen_pdf: string | null;
   items: InvoiceItem[];
   created_at: string;
   updated_at: string;

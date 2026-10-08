@@ -22,6 +22,12 @@ use DevAppPro\Services\NotificationService;
  */
 class InvoiceApiController extends ApiController
 {
+    /**
+     * Statusy, při kterých faktura platí za vydanou — PDF se zmrazí
+     * jako archivní kopie (účetní doklad se nesmí zpětně měnit).
+     */
+    private const ISSUED_STATUSES = ['sent', 'paid', 'overdue'];
+
     private Auth $auth;
 
     public function __construct()
@@ -164,7 +170,7 @@ class InvoiceApiController extends ApiController
         }
 
         $service = $this->repo(\DevAppPro\Services\InvoicePdfService::class);
-        $pdf = $service->generate($id);
+        $pdf = $this->loadFrozenOrGenerate($service, $invoice, $id);
 
         $filename = 'faktura-' . $invoice['invoice_number'];
         $clientName = $this->slugifyFilename((string) ($invoice['client_name'] ?? ''));
@@ -197,10 +203,12 @@ class InvoiceApiController extends ApiController
         $id = $repo->create($result['data']);
         $invoice = $repo->find($id);
 
+        $this->maybeFreezePdf($repo, $invoice, 'draft');
+
         $notif = $this->repo(NotificationService::class);
         $notif->invoiceCreated((int) ($_SESSION['user_id'] ?? 0), $id, $invoice['invoice_number']);
 
-        $this->jsonSuccess($invoice, 201);
+        $this->jsonSuccess($repo->find($id), 201);
     }
 
     /**
@@ -229,10 +237,12 @@ class InvoiceApiController extends ApiController
         $repo->update($id, $result['data']);
         $invoice = $repo->find($id);
 
+        $this->maybeFreezePdf($repo, $invoice, (string) $existing['status']);
+
         $notif = $this->repo(NotificationService::class);
         $notif->invoiceUpdated((int) ($_SESSION['user_id'] ?? 0), $id, $invoice['invoice_number']);
 
-        $this->jsonSuccess($invoice, 200);
+        $this->jsonSuccess($repo->find($id), 200);
     }
 
     /**
@@ -274,12 +284,76 @@ class InvoiceApiController extends ApiController
         }
 
         $repo->delete($id);
+        $this->deleteFrozenFile($existing);
 
         $notif = $this->repo(NotificationService::class);
         $notif->invoiceDeleted((int) ($_SESSION['user_id'] ?? 0), $existing['invoice_number']);
 
         http_response_code(204);
         // 204 No Content - žádné tělo odpovědi
+    }
+
+    /**
+     * Servíruje zmrazenou archivní kopii, pokud existuje; jinak generuje živě.
+     * Vydaná faktura musí dát vždy stejné PDF, jaké bylo odesláno.
+     */
+    private function loadFrozenOrGenerate(InvoicePdfService $service, array $invoice, int $id): string
+    {
+        $rel = (string) ($invoice['frozen_pdf'] ?? '');
+        if ($rel !== '' && !str_contains($rel, '..')) {
+            $full = InvoicePdfService::storageDir() . '/' . $rel;
+            if (is_file($full)) {
+                $data = file_get_contents($full);
+                if ($data !== false) {
+                    return $data;
+                }
+            }
+        }
+
+        return $service->generate($id);
+    }
+
+    /**
+     * Zmrazí PDF při přechodu faktury na vydaný status
+     * (sent/paid/overdue) — nebo když je faktura vydaná, ale
+     * archivní kopie chybí (legacy faktury, re-issue).
+     * Selhání zápisu jen loguje — status se nesmí blokovat.
+     */
+    private function maybeFreezePdf(InvoiceRepository $repo, array $invoice, string $previousStatus): void
+    {
+        if (!in_array($invoice['status'], self::ISSUED_STATUSES, true)) {
+            return;
+        }
+        $wasIssued = in_array($previousStatus, self::ISSUED_STATUSES, true);
+        if ($wasIssued && !empty($invoice['frozen_pdf'])) {
+            return;
+        }
+
+        try {
+            $service = $this->repo(InvoicePdfService::class);
+            $repo->setFrozenPdf((int) $invoice['id'], $service->freeze((int) $invoice['id']));
+        } catch (\Throwable $e) {
+            error_log('Zmrazení PDF faktury ' . $invoice['id'] . ' selhalo: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Smaže zmrazený PDF soubor při smazání faktury.
+     */
+    private function deleteFrozenFile(array $invoice): void
+    {
+        $rel = (string) ($invoice['frozen_pdf'] ?? '');
+        if ($rel === '' || str_contains($rel, '..')) {
+            return;
+        }
+        $full = InvoicePdfService::storageDir() . '/' . $rel;
+        if (is_file($full)) {
+            try {
+                unlink($full);
+            } catch (\Throwable) {
+                error_log('Nelze smazat zmrazené PDF: ' . $full);
+            }
+        }
     }
 
     /**
