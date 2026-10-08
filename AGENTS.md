@@ -96,7 +96,7 @@
 - Podpora: ZIP archivy, Duplicator Pro DAF
 - Kroky: extracting → creating_db → importing_sql → configuring → replacing_urls → regenerating_ssl → completed
 - Search/replace: serialization-aware (opravuje délky s:XX:), nahrazuje URL i cesty na disku
-- Detekce staré cesty: z WP options (recently_edited, et_images_temp_folder, upload_path)
+- Detekce staré cesty: options → Duplicator descriptor (archive.txt originalPaths.home) → frekvenční scan options; post-replace sweep findLeftoverFsRoots doplní zbylé rooty do replace; fix-upy mažou downloaded_font_files + dirsize transient + fonts/*.css
 - Po importu maže cache (et-cache, wp-content/cache - jinak Divi ikony = číslice) a Duplicator pozůstatky (installer.php, dup-installer/ - obsahuje dump DB)
 - Deaktivuje pluginy škodlivé na localhostu: bezpečnostní (BBQ/WPS Hide Login/limit-login/RSS/Complianz - blokují "localhost" v URL, schovávají admin), cache, worker (ManageWP). Duplicator NEdeaktivovat - uživatel ho používá denně pro zálohy. SEO a funkční pluginy zůstávají.
 - Pozor: @unserialize v restore potřebuje try/catch - bootstrap error handler převádí i @-potlačená varování na ErrorException
