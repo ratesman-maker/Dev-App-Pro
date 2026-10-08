@@ -43,7 +43,7 @@ Moderní nástěnka ve stylu shadcn dashboard-01:
 ### Projekty
 - Vazba na klienta, interní projekty bez klienta
 - Rozpočet, termín, status (aktivní / pozastaveno / dokončeno / zrušeno / archivováno)
-- Typ projektu: `static` / `wordpress` (autodetekce při sync ze složky)
+- Typ projektu: `static` / `php` / `wordpress` (autodetekce při sync ze složky; statické vhosty běží bez FPM)
 - **Per-projekt PHP verze** (7.4–8.5, přepnutí přes FPM)
 - **Automatická synchronizace ze složek** — složky v `PROJECTS_WATCH_DIR` se promítají do projektů
 - **Automatický hosting** — generování Apache vhostů + SSL (mkcert) pro každý projekt
@@ -62,6 +62,7 @@ Moderní nástěnka ve stylu shadcn dashboard-01:
 - **QR Platba** (standard ČBA, SPD 1.0) — IBAN (fallback na profil firmy, přepočet čísla účtu na IBAN), částka, variabilní symbol
 - Název PDF souboru: `faktura-{číslo}-{klient}.pdf`
 - **Platby faktur** — přepočet zaplaceno, automatický status `paid`
+- **Archivní kopie PDF** — při přechodu na „odesláno/zaplaceno" se PDF zmrazí do `storage/`; stažení vydané faktury vždy vrátí verzi, která byla vydána
 
 ### Finance
 - **Transakce** — příjmy/výdaje, kategorie, vazba na projekt/klienta/fakturu
@@ -285,6 +286,7 @@ bin/test.sh integration          # všechny API testy
 bin/test.sh integration invoices # jen modul (auth, clients, projects, tasks, invoices,
                                  # finance, notes, files, settings, dashboard)
 bin/test.sh security             # bezpečnostní testy
+bin/test.sh e2e                  # Playwright E2E (build + specy frontend/e2e/)
 bin/test.sh full                 # kompletní sada — běží v CI na PR
 ```
 
@@ -369,5 +371,5 @@ assets/dist/   build výstup frontendu (v .gitignore)
 ## Dokumentace
 
 - [docs/duplicator-import.md](docs/duplicator-import.md) — obnova webů z Duplicator záloh
-- [AGENTS.md](AGENTS.md) — detailní technické poznámky, verze, příkazy
-- [docs/](docs/) — další dokumentace, revize a opravy
+- [AGENTS.md](AGENTS.md) — vývojová pravidla a provozní konvence pro agenty
+- [docs/](docs/) — dokumentace, revize, opravy a post-mortemy incidentů
