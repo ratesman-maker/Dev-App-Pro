@@ -74,6 +74,47 @@ class InvoicePdfService
     }
 
     /**
+     * Vygeneruje PDF a uloží ho jako zmrazenou archivní kopii
+     * do storage/invoices/. Volá se při přechodu faktury na
+     * status sent/paid/overdue — vydaná faktura je účetní doklad
+     * a stažené PDF musí odpovídat verzi, která byla vydána.
+     *
+     * @return string Relativní cesta pod storage/ (např. invoices/faktura-2026001.pdf).
+     * @throws \RuntimeException Pokud faktura neexistuje nebo zápis selže.
+     */
+    public function freeze(int $invoiceId): string
+    {
+        $invoice = $this->invoices->find($invoiceId);
+        if ($invoice === null) {
+            throw new \RuntimeException('Faktura nenalezena.');
+        }
+
+        $pdf = $this->generate($invoiceId);
+
+        $safeNumber = (string) preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) $invoice['invoice_number']);
+        $relativePath = 'invoices/faktura-' . $safeNumber . '.pdf';
+
+        $dir = self::storageDir() . '/invoices';
+        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+            throw new \RuntimeException('Nelze vytvořit adresář ' . $dir);
+        }
+
+        if (file_put_contents(self::storageDir() . '/' . $relativePath, $pdf) === false) {
+            throw new \RuntimeException('Zápis zmrazeného PDF selhal: ' . $relativePath);
+        }
+
+        return $relativePath;
+    }
+
+    /**
+     * Absolutní cesta k adresáři storage/.
+     */
+    public static function storageDir(): string
+    {
+        return dirname(__DIR__, 2) . '/storage';
+    }
+
+    /**
      * Naformátuje datum z ISO formátu (2026-03-26) na český formát (26.3.2026).
      */
     public function formatDate(string $date): string

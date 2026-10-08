@@ -550,4 +550,63 @@ class InvoiceApiTest extends TestCase
         $body = json_decode((string) $response->getBody(), true);
         $this->assertArrayHasKey('error', $body);
     }
+
+    /**
+     * PUT status=sent zmrazí PDF do storage/invoices/, GET .../pdf
+     * servíruje přesně archivní kopii, DELETE soubor uklidí.
+     */
+    public function test_odeslani_faktury_zmrazi_pdf(): void
+    {
+        $this->login();
+
+        $createResponse = $this->http->post('/api/invoices', [
+            'json' => [
+                'invoice_number'   => '2099001',
+                'subtotal_cents'    => 100000,
+                'vat_rate_percent'  => 21,
+                'issue_date'        => '2026-09-11',
+                'due_date'          => '2026-09-25',
+            ],
+            'headers' => [
+                'X-CSRF-Token' => $this->csrfToken,
+            ],
+        ]);
+        $created = json_decode((string) $createResponse->getBody(), true);
+        $id = $created['id'];
+        $frozenPath = dirname(__DIR__, 2) . '/storage/invoices/faktura-2099001.pdf';
+
+        try {
+            $response = $this->http->request('PUT', '/api/invoices/' . $id, [
+                'json' => ['status' => 'sent'],
+                'headers' => [
+                    'X-CSRF-Token' => $this->csrfToken,
+                ],
+            ]);
+
+            $this->assertEquals(200, $response->getStatusCode());
+            $body = json_decode((string) $response->getBody(), true);
+            $this->assertSame('sent', $body['status']);
+            $this->assertSame('invoices/faktura-2099001.pdf', $body['frozen_pdf']);
+            $this->assertFileExists($frozenPath);
+
+            $pdfResponse = $this->http->get('/api/invoices/' . $id . '/pdf');
+            $this->assertEquals(200, $pdfResponse->getStatusCode());
+            $this->assertSame(
+                file_get_contents($frozenPath),
+                (string) $pdfResponse->getBody()
+            );
+
+            $delResponse = $this->http->request('DELETE', '/api/invoices/' . $id, [
+                'headers' => [
+                    'X-CSRF-Token' => $this->csrfToken,
+                ],
+            ]);
+            $this->assertEquals(204, $delResponse->getStatusCode());
+            $this->assertFileDoesNotExist($frozenPath);
+        } finally {
+            if (is_file($frozenPath)) {
+                unlink($frozenPath);
+            }
+        }
+    }
 }
