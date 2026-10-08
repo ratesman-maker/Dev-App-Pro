@@ -25,6 +25,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 - Bootstrap error logger: `restore_error_handler()` před zápisem do error.log — CLI spuštěné jako `ratesman` nepadá na právech souboru a výjimka se vypíše na STDERR
 
 ### Added
+- Zmrazení PDF při vydání faktury (migration_020, `invoices.frozen_pdf`) — při přechodu na sent/paid/overdue se PDF uloží do `storage/invoices/faktura-<číslo>.pdf` a PDF endpoint servíruje tuto archivní kopii; vydaná faktura se tak zpětně nemění úpravou položek ani profilu firmy. DELETE faktury soubor uklidí, detail ukazuje „Archivní PDF"
 - Sloupec "Zástupce" v tabulce klientů — u organizací jméno kontaktní osoby + její e-mail/telefon na druhém řádku
 - Kontaktní osoba (zástupce) u organizací — `clients.contact_name/contact_email/contact_phone` (migration_019); formulář ukazuje sekci jen u firem/nezisku/státní správy, search prohledává zástupce, detail klienta ho zobrazuje
 - Playwright E2E testy (`bin/test.sh e2e`): 9 speců (login, chybné heslo, redirect nepřihlášeného, nástěnka, Projekty/Úkoly/Klienti, 404) proti `php -S` na `devapppro_test` — pokrývá SPA regrese, které API testy nevidí; běží v CI

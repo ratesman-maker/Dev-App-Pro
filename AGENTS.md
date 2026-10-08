@@ -115,6 +115,7 @@
 - Frontend: tlačítko "Vystavit fakturu" (detail klienta s předvyplněným klientem + Finance tab), editor položek, auto-download PDF po vytvoření
 - Položky se zobrazují v InvoiceDetailModal
 - PDF endpoint: GET /api/invoices/{id}/pdf (frontend volá bez .php, Apache rewrite zachovává REQUEST_URI)
+- Zmrazení PDF (migration_020, `invoices.frozen_pdf`): při přechodu na sent/paid/overdue se PDF uloží do `storage/invoices/faktura-<číslo>.pdf` (InvoicePdfService::freeze) a endpoint servíruje tu kopii — vydaná faktura je neměnný účetní doklad. Draft/cancelled = živá generace. DELETE faktury soubor smaže. `frozen_pdf` je interní sloupec (setFrozenPdf), není v ALLOWED_COLUMNS
 
 ## Vývojová pravidla (dohodnuto 19. 9. 2026, odsouhlaseno uživatelem)
 
