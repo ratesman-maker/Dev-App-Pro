@@ -26,9 +26,19 @@ use DevAppPro\Services\AclService;
 use DevAppPro\Services\ProjectSyncService;
 use Duplicator\Libs\DupArchive\DupArchiveExpandBasicEngine;
 
+const RESTORE_LOG = '/var/log/devapppro-restore.log';
+
 function logMsg(string $msg): void
 {
-    echo '[' . date('Y-m-d H:i:s') . '] ' . $msg . PHP_EOL;
+    $line = '[' . date('Y-m-d H:i:s') . '] ' . $msg . PHP_EOL;
+    echo $line;
+    // Worker běží pod cronem (root) — stdout se zahazuje, proto persistovat
+    // do souboru. Selhání zápisu nesmí shodit restore.
+    try {
+        file_put_contents(RESTORE_LOG, $line, FILE_APPEND | LOCK_EX);
+    } catch (\Throwable) {
+        // bez logu dál
+    }
 }
 
 function updateStatus(\PDO $db, int $id, string $status, ?string $error = null): void
@@ -348,42 +358,136 @@ function recursiveReplace(mixed $data, array $replacements): mixed
 }
 
 /**
- * Detekce staré cesty na serveru z WordPress databáze.
- * Hledá v options jako recently_edited, et_images_temp_folder, upload_path, atd.
+ * Extrahuje kořen WP instalace z hodnoty obsahující absolutní FS cestu.
+ * Vrací prefix před /wp-content|wp-includes|wp-admin (např. /home/html/site/_sub/web).
  */
-function findOldPath(\PDO $sitePdo, string $tablePrefix): ?string
+function extractFsRoot(string $value): ?string
+{
+    if (preg_match('#(/(?:home|var/www|usr/www|srv|opt|mnt)/[^\s"\'\\\\]+?)/(?:wp-content|wp-includes|wp-admin|wp-login)#', $value, $m)) {
+        return rtrim($m[1], '/');
+    }
+    return null;
+}
+
+/**
+ * Původní cesta WP rootu z Duplicator descriptoru (archive.txt).
+ * Metadata archivu jsou autoritativní zdroj — obsahují cestu, ze které
+ * byl snapshot pořízen, nezávisle na tom, co zbylo v options.
+ */
+function findOldPathFromDescriptor(string $targetRoot): ?string
+{
+    $archiveTxt = glob($targetRoot . '/dup-installer/dup_descriptors_*/archive.txt');
+    if (empty($archiveTxt) || !file_exists($archiveTxt[0])) {
+        return null;
+    }
+    $cfg = json_decode((string) file_get_contents($archiveTxt[0]), true);
+    if (!is_array($cfg)) {
+        return null;
+    }
+
+    $origPaths = $cfg['wpInfo']['configs']['realValues']['originalPaths'] ?? [];
+    $candidates = [
+        $origPaths['home'] ?? null,
+        $origPaths['abs'] ?? null,
+        $origPaths['wpconfig'] ?? null,
+        $cfg['wpInfo']['targetRoot'] ?? null,
+    ];
+    // subsites[0].fullUploadPath = <root>/wp-content/uploads → oříznout suffix
+    $upload = $cfg['subsites'][0]['fullUploadPath'] ?? null;
+    if (is_string($upload) && $upload !== '') {
+        $candidates[] = preg_replace('#/wp-content/uploads/?$#', '', $upload);
+    }
+
+    foreach ($candidates as $c) {
+        if (is_string($c) && str_starts_with($c, '/')) {
+            return rtrim($c, '/');
+        }
+    }
+    return null;
+}
+
+/**
+ * Detekce staré cesty na serveru. Tři úrovně:
+ * 1) známé options (recently_edited, upload_path, …)
+ * 2) Duplicator descriptor (archive.txt — původní cesta z metadat)
+ * 3) frekvenční scan options — nejčastější absolutní prefix před /wp-content
+ *    (pokryje weby, kde detekční options jsou prázdné — např. Kadence
+ *    downloaded_font_files, dirsize transienty)
+ */
+function findOldPath(\PDO $sitePdo, string $tablePrefix, ?string $targetRoot = null): ?string
 {
     $optionsTable = $tablePrefix . 'options';
 
-    // Zkusit najít cestu v různých options
+    // 1) Známé options
     $keys = ['recently_edited', 'et_images_temp_folder', 'upload_path', 'stylesheet_root', 'template_root'];
     foreach ($keys as $key) {
         $stmt = $sitePdo->prepare("SELECT option_value FROM `{$optionsTable}` WHERE option_name = ? LIMIT 1");
         $stmt->execute([$key]);
         $val = $stmt->fetchColumn();
-        if ($val && preg_match('#(/home/[^\s"\']+|/var/www/[^\s"\']+|/srv/[^\s"\']+)#', $val, $m)) {
-            // Najít kořenovou cestu (do wp-content nebo wp-includes)
-            $path = $m[1];
-            // Oříznout na kořen - najít /wp-content nebo /wp-includes nebo /wp-admin
-            if (preg_match('#^(.+?)/(wp-content|wp-includes|wp-admin|wp-login)#', $path, $rootMatch)) {
-                return rtrim($rootMatch[1], '/');
-            }
-            return rtrim($path, '/');
+        if ($val && ($root = extractFsRoot((string) $val)) !== null) {
+            return $root;
         }
     }
 
-    // Fallback: hledat v _transient_dirsize_cache nebo jiných serializovaných datech
-    $stmt = $sitePdo->query("SELECT option_value FROM `{$optionsTable}` WHERE option_value LIKE '%/home/www/%' OR option_value LIKE '%/var/www/%' LIMIT 1");
-    $val = $stmt->fetchColumn();
-    if ($val && preg_match('#(/home/[^\s"\']+|/var/www/[^\s"\']+)#', $val, $m)) {
-        $path = $m[1];
-        if (preg_match('#^(.+?)/(wp-content|wp-includes|wp-admin|wp-login)#', $path, $rootMatch)) {
-            return rtrim($rootMatch[1], '/');
+    // 2) Duplicator descriptor (dup-installer existuje — maže se až v kroku 6d)
+    if ($targetRoot !== null && ($root = findOldPathFromDescriptor($targetRoot)) !== null) {
+        logMsg("Stará cesta z Duplicator descriptoru: {$root}");
+        return $root;
+    }
+
+    // 3) Frekvenční scan — nejčastější absolutní root v options
+    $roots = [];
+    $stmt = $sitePdo->query(
+        "SELECT option_value FROM `{$optionsTable}` "
+        . "WHERE option_value REGEXP '/(home|var|usr|srv|opt|mnt)/[^[:space:]\"'']+/wp-content' LIMIT 200"
+    );
+    while (($val = $stmt->fetchColumn()) !== false) {
+        $root = extractFsRoot((string) $val);
+        if ($root !== null) {
+            $roots[$root] = ($roots[$root] ?? 0) + substr_count((string) $val, $root);
         }
-        return rtrim($path, '/');
+    }
+    if ($roots) {
+        arsort($roots);
+        $root = array_key_first($roots);
+        logMsg("Stará cesta z frekvenčního scanu options: {$root}");
+        return $root;
     }
 
     return null;
+}
+
+/**
+ * Post-replace sweep: najde absolutní FS rooty, které v DB přežily
+ * replace (typicky když detekce staré cesty selhala). Vrací seznam
+ * rootů != $newPath seřazený podle frekvence.
+ */
+function findLeftoverFsRoots(\PDO $sitePdo, string $tablePrefix, string $newPath): array
+{
+    $found = [];
+    $targets = [
+        [$tablePrefix . 'options', 'option_value'],
+        [$tablePrefix . 'postmeta', 'meta_value'],
+        [$tablePrefix . 'posts', 'post_content'],
+    ];
+    foreach ($targets as [$table, $col]) {
+        try {
+            $stmt = $sitePdo->query(
+                "SELECT `{$col}` FROM `{$table}` "
+                . "WHERE `{$col}` REGEXP '/(home|var|usr|srv|opt|mnt)/[^[:space:]\"'']+/wp-content' LIMIT 300"
+            );
+        } catch (\Throwable $e) {
+            continue; // tabulka nemusí existovat
+        }
+        while (($val = $stmt->fetchColumn()) !== false) {
+            $root = extractFsRoot((string) $val);
+            if ($root !== null && $root !== $newPath) {
+                $found[$root] = ($found[$root] ?? 0) + substr_count((string) $val, $root);
+            }
+        }
+    }
+    arsort($found);
+    return array_keys($found);
 }
 
 /**
@@ -670,43 +774,57 @@ HTACCESS;
 
     // 6. Search/replace URL a cest (serialization-aware)
     updateStatus($db, $id, 'replacing_urls');
+    $newPath = $targetRoot; // PROJECTS_WATCH_DIR/{name}
     if ($oldUrl) {
-        // Detekovat starou cestu na serveru z DB
-        $oldPath = findOldPath($sitePdo, $tablePrefix);
-        $newPath = $targetRoot; // PROJECTS_WATCH_DIR/{name}
+        // Detekovat starou cestu: options → Duplicator descriptor → frekvenční scan
+        $oldPath = findOldPath($sitePdo, $tablePrefix, $targetRoot);
         if ($oldPath) {
             logMsg("Detekována stará cesta: {$oldPath} → {$newPath}");
+        } else {
+            logMsg("WARN: Stará FS cesta nedetekována (options, descriptor ani scan) — případné zbytky odchytí post-replace sweep");
         }
         replaceUrlsInDb($dbNameEsc, $dbUserEsc, $dbPassword, $oldUrl, $newUrl, $oldPath, $newPath);
     } else {
         logMsg("Stará URL nenalezena, přeskakuji search/replace");
     }
 
-    // 6b. Opravit CSS soubory s lokálními fonty (Kadence theme ukládá absolutní cesty)
+    // 6b. Cache fix-upy — Kadence/WPTT drží mapu font→FS cesta v option
+    // downloaded_font_files a generuje <hash>.css (hash z base_url+base_path
+    // → staré CSS jsou po restore stejně mrtvé). Obojí je čistá cache,
+    // zregeneruje se na nové cestě sama. Stejně dirsize transient — drží
+    // stovky starých FS cest. Smazáním je samooprava i bez dokonalé detekce.
+    // Běží PŘED sweepem — tyto options by jinak sweep hlásil jako leftover.
+    try {
+        $sitePdo->exec(
+            "DELETE FROM `{$optionsTable}` WHERE option_name IN "
+            . "('downloaded_font_files','_transient_dirsize_cache','_transient_timeout_dirsize_cache')"
+        );
+    } catch (\Throwable $e) {
+        logMsg('WARN: úklid cache options selhal: ' . $e->getMessage());
+    }
     $fontsDir = $targetRoot . '/wp-content/fonts';
     if (is_dir($fontsDir)) {
-        $cssFiles = glob($fontsDir . '/*.css');
+        $cssFiles = glob($fontsDir . '/*.css') ?: [];
         foreach ($cssFiles as $cssFile) {
-            $content = file_get_contents($cssFile);
-            if ($content === false) continue;
-            $changed = false;
-            if ($oldPath && strpos($content, $oldPath) !== false) {
-                $content = str_replace($oldPath . '/wp-content//fonts', '/wp-content/fonts', $content);
-                $content = str_replace($oldPath . '/wp-content/fonts', '/wp-content/fonts', $content);
-                $changed = true;
+            try {
+                unlink($cssFile);
+            } catch (\Throwable $e) {
+                logMsg('WARN: nelze smazat ' . basename($cssFile) . ': ' . $e->getMessage());
             }
-            if (strpos($content, $newPath . '/wp-content//fonts') !== false) {
-                $content = str_replace($newPath . '/wp-content//fonts', '/wp-content/fonts', $content);
-                $changed = true;
-            }
-            if (strpos($content, $newPath . '/wp-content/fonts') !== false) {
-                $content = str_replace($newPath . '/wp-content/fonts', '/wp-content/fonts', $content);
-                $changed = true;
-            }
-            if ($changed) {
-                file_put_contents($cssFile, $content);
-                logMsg("Opraveny cesty k fontům v: " . basename($cssFile));
-            }
+        }
+        if ($cssFiles) {
+            logMsg('Smazáno ' . count($cssFiles) . ' starých font CSS (zregenerují se na nové cestě)');
+        }
+    }
+
+    // 6c1. Post-replace sweep — canary na zbylé FS cesty. Detekce mohla selhat
+    // tiše (prázdné options, non-Duplicator archiv) → cesty v options/postmeta
+    // by přežily a rozbily např. lokální fonty. Zbylé rooty přidat do replace.
+    $leftoverRoots = findLeftoverFsRoots($sitePdo, $tablePrefix, $newPath);
+    if ($leftoverRoots) {
+        logMsg('WARN: Po replace zůstaly staré FS cesty: ' . implode(', ', $leftoverRoots) . ' — doplňuji náhradu');
+        foreach ($leftoverRoots as $leftover) {
+            replaceUrlsInDb($dbNameEsc, $dbUserEsc, $dbPassword, $newUrl, $newUrl, $leftover, $newPath);
         }
     }
 
