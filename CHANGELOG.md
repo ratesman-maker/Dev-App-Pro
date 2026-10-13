@@ -19,6 +19,8 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ### Fixed
 
+- **Přepnutí faktury na Zaplaceno započítá částku do statistik.** Status `paid` se nastavoval bez záznamu platby, takže `paid_cents` zůstávalo 0 a „Celkem zaplaceno" fakturu ignorovalo. `ensurePaidPayment()` teď při `store` i `update` doplní platbu na zbývající částku (poznámka „Automaticky při přepnutí na Zaplaceno"); symetricky k existujícímu `recalculatePaid`, který platby → status řešil. Faktura 2026004 dostala nápravnou platbu 150 000 Kč.
+
 - **Editace faktury ze seznamu načte položky a neblokuje změnu statusu.** Editační dialog dostával řádek ze seznamu bez položek (vrací je jen detail), takže ukazoval jednu prázdnou položku a validace bránila submitu; při vyplnění by se skutečné položky přepsaly. Nový sdílený hook `useInvoice(id)` dohoní `GET /api/invoices/{id}` v dialogu i detailu; typ `Invoice.items` je nově optional. Regresní E2E spec `invoices.spec.ts` pokrývá celý tok (vystavení → editace → přepnutí na Zaplaceno).
 
 ## [1.1.0] - 2026-10-08
