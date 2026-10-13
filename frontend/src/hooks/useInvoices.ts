@@ -38,7 +38,8 @@ export interface Invoice {
   taxable_date: string | null;
   note: string | null;
   frozen_pdf: string | null;
-  items: InvoiceItem[];
+  /** Položky vrací jen detail (GET /api/invoices/{id}); řádky seznamu je nemají. */
+  items?: InvoiceItem[];
   created_at: string;
   updated_at: string;
 }
@@ -91,6 +92,14 @@ export function useInvoices(params?: InvoicesParams) {
     queryKey: ['invoices', params],
     queryFn: () => api.get<InvoicesResponse>(`/invoices?${query.toString()}`),
     enabled: params?.enabled ?? true,
+  });
+}
+
+export function useInvoice(id: number | null | undefined, enabled = true) {
+  return useQuery<Invoice>({
+    queryKey: ['invoice', id],
+    queryFn: () => api.get<Invoice>(`/invoices/${id}`),
+    enabled: !!id && enabled,
   });
 }
 
