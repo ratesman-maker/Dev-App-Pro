@@ -368,6 +368,39 @@ class DashboardApiTest extends TestCase
     }
 
     /**
+     * Platba faktury se započítá do income série aktuálního měsíce
+     * (regrese: graf Příjmy/výdaje ignoroval invoice_payments → prázdný graf).
+     */
+    public function test_dashboard_finance_series_zahrnuje_platby_faktur(): void
+    {
+        $this->login();
+
+        $invoiceId = $this->createInvoice(['subtotal_cents' => 150000]);
+
+        $payResponse = $this->http->post('/api/invoice-payments', [
+            'json' => [
+                'invoice_id'   => $invoiceId,
+                'amount_cents' => 150000,
+                'payment_date' => date('Y-m-d'),
+                'method'       => 'bank_transfer',
+            ],
+            'headers' => ['X-CSRF-Token' => $this->csrfToken],
+        ]);
+        $this->assertEquals(201, $payResponse->getStatusCode());
+
+        $response = $this->http->get('/api/dashboard');
+        $body = json_decode((string) $response->getBody(), true);
+
+        $series = $body['finance_series'];
+        $last = $series[count($series) - 1];
+        $this->assertSame(date('Y-m'), $last['month']);
+        $this->assertGreaterThanOrEqual(150000, (int) $last['income_cents']);
+
+        // Karta „Příjmy" počítá totéž: transakce + platby faktur
+        $this->assertGreaterThanOrEqual(150000, (int) $body['finance']['total_income_cents']);
+    }
+
+    /**
      * Overdue faktura + termín projektu ≤ 14 dní + poznámka → attention.
      */
     public function test_dashboard_attention(): void
