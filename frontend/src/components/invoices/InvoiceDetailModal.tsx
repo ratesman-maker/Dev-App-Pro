@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Pencil, Trash2, Download, Plus } from 'lucide-react';
-import { api, ApiError } from '@/lib/api';
+import { ApiError } from '@/lib/api';
 import { fmtDate, fmtDateTime, fmtMoney, fmtBytes } from '@/lib/utils';
-import { type Invoice, useDeleteInvoice, useDownloadInvoicePdf } from '@/hooks/useInvoices';
+import { type Invoice, useInvoice, useDeleteInvoice, useDownloadInvoicePdf } from '@/hooks/useInvoices';
 import {
   useInvoicePayments,
   useDeleteInvoicePayment,
@@ -88,11 +87,7 @@ export function InvoiceDetailModal({ open, onClose, invoiceId }: InvoiceDetailMo
   const [editingPayment, setEditingPayment] = useState<InvoicePayment | null>(null);
   const [deletePayment, setDeletePayment] = useState<InvoicePayment | null>(null);
 
-  const { data: invoice, isLoading, isError, error } = useQuery<Invoice>({
-    queryKey: ['invoice', invoiceId],
-    queryFn: () => api.get<Invoice>(`/invoices/${invoiceId}`),
-    enabled: open && !!invoiceId,
-  });
+  const { data: invoice, isLoading, isError, error } = useInvoice(invoiceId, open);
 
   const isNotFound = isError && error instanceof ApiError && error.status === 404;
 
@@ -184,6 +179,7 @@ export function InvoiceDetailModal({ open, onClose, invoiceId }: InvoiceDetailMo
   const notes = notesData?.data ?? [];
   const files = filesData?.data ?? [];
   const remaining = invoice.amount_cents - invoice.paid_cents;
+  const invoiceItems = invoice.items ?? [];
 
   const tabs: DetailModalTab[] = [
     {
@@ -208,11 +204,11 @@ export function InvoiceDetailModal({ open, onClose, invoiceId }: InvoiceDetailMo
                 value={invoice.frozen_pdf ? 'Zmrazená kopie vydané faktury' : null}
               />
               <DetailRow label="Vytvořeno" value={fmtDateTime(invoice.created_at)} />
-              {invoice.items?.length > 0 && (
+              {invoiceItems.length > 0 && (
                 <div className="py-2">
                   <dt className="text-xs font-medium text-muted-foreground mb-2">Položky</dt>
                   <div className="space-y-1">
-                    {invoice.items.map((item) => (
+                    {invoiceItems.map((item) => (
                       <div key={item.id} className="flex items-center justify-between gap-2 text-sm">
                         <span className="min-w-0 flex-1 truncate">
                           {item.description}

@@ -11,6 +11,7 @@ import {
   useCreateInvoice,
   useUpdateInvoice,
   useDownloadInvoicePdf,
+  useInvoice,
   type Invoice,
   type InvoiceInput,
   type InvoiceItemInput,
@@ -94,28 +95,32 @@ export function InvoiceFormDialog({ open, onClose, invoice, presetClientId }: In
 
   const { data: clientsData } = useClients({ per_page: 200 });
   const { data: projectsData } = useProjects({ per_page: 200 });
+  // Řádek ze seznamu nemá items — při editaci dohonit detail z API,
+  // jinak by submit s prázdnými položkami smazal skutečné položky faktury.
+  const { data: detail } = useInvoice(open && isEdit ? invoice.id : null);
+  const resolved = detail ?? invoice;
 
   const [form, setForm] = useState<InvoiceFormState>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (open) {
-      if (invoice) {
+      if (resolved) {
         setForm({
-          client_id: invoice.client_id ? String(invoice.client_id) : '',
-          project_id: invoice.project_id ? String(invoice.project_id) : '',
-          invoice_number: invoice.invoice_number,
-          vat_rate_percent: String(invoice.vat_rate_percent),
-          issue_date: toDateInput(invoice.issue_date),
-          due_date: toDateInput(invoice.due_date),
-          taxable_date: toDateInput(invoice.taxable_date),
-          variable_symbol: invoice.variable_symbol ?? '',
-          constant_symbol: invoice.constant_symbol ?? '',
-          iban: invoice.iban ?? '',
-          note: invoice.note ?? '',
-          status: invoice.status,
-          items: invoice.items?.length
-            ? invoice.items.map((it) => ({
+          client_id: resolved.client_id ? String(resolved.client_id) : '',
+          project_id: resolved.project_id ? String(resolved.project_id) : '',
+          invoice_number: resolved.invoice_number,
+          vat_rate_percent: String(resolved.vat_rate_percent),
+          issue_date: toDateInput(resolved.issue_date),
+          due_date: toDateInput(resolved.due_date),
+          taxable_date: toDateInput(resolved.taxable_date),
+          variable_symbol: resolved.variable_symbol ?? '',
+          constant_symbol: resolved.constant_symbol ?? '',
+          iban: resolved.iban ?? '',
+          note: resolved.note ?? '',
+          status: resolved.status,
+          items: resolved.items?.length
+            ? resolved.items.map((it) => ({
                 description: it.description,
                 quantity: String(it.quantity),
                 unit: it.unit ?? '',
@@ -131,7 +136,7 @@ export function InvoiceFormDialog({ open, onClose, invoice, presetClientId }: In
       }
       setErrors({});
     }
-  }, [open, invoice, presetClientId]);
+  }, [open, resolved, presetClientId]);
 
   const update = <K extends keyof InvoiceFormState>(field: K, value: InvoiceFormState[K]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
