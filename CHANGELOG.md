@@ -17,6 +17,10 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Editace faktury ze seznamu načte položky a neblokuje změnu statusu.** Editační dialog dostával řádek ze seznamu bez položek (vrací je jen detail), takže ukazoval jednu prázdnou položku a validace bránila submitu; při vyplnění by se skutečné položky přepsaly. Nový sdílený hook `useInvoice(id)` dohoní `GET /api/invoices/{id}` v dialogu i detailu; typ `Invoice.items` je nově optional. Regresní E2E spec `invoices.spec.ts` pokrývá celý tok (vystavení → editace → přepnutí na Zaplaceno).
+
 ## [1.1.0] - 2026-10-08
 
 ### Added
