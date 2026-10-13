@@ -68,10 +68,11 @@ class DashboardApiController extends ApiController
         $invoicePaid = $this->sumWhere($pdo, 'invoices', 'paid_cents', "status = 'paid'");
         $incomeTransactions = $this->sumWhere($pdo, 'transactions', 'amount_cents', "type = 'income'");
         $expenseTransactions = $this->sumWhere($pdo, 'transactions', 'amount_cents', "type = 'expense'");
+        $invoicePayments = $this->sumWhere($pdo, 'invoice_payments', 'amount_cents', '1=1');
 
         $finance = [
             'total_paid_cents'    => $invoicePaid + $incomeTransactions,
-            'total_income_cents'  => $incomeTransactions,
+            'total_income_cents'  => $incomeTransactions + $invoicePayments,
             'total_expense_cents' => $expenseTransactions,
             'total_open_cents'    => $this->sumWhere(
                 $pdo,
@@ -219,13 +220,20 @@ class DashboardApiController extends ApiController
         }
 
         // === FINANCE: příjmy/výdaje za posledních 12 měsíců (pro graf) ===
+        // Příjmy = ruční income transakce + platby faktur (stejná sémantika
+        // jako finance-overview; bez UNIONu se platby faktur v grafu neukážou)
         $monthRows = $pdo->query(
-            "SELECT DATE_FORMAT(`transaction_date`, '%Y-%m') AS month, "
-            . "SUM(CASE WHEN `type` = 'income' THEN `amount_cents` ELSE 0 END) AS income_cents, "
-            . "SUM(CASE WHEN `type` = 'expense' THEN `amount_cents` ELSE 0 END) AS expense_cents "
+            "SELECT `month`, SUM(`income_cents`) AS income_cents, SUM(`expense_cents`) AS expense_cents FROM ("
+            . "SELECT DATE_FORMAT(`transaction_date`, '%Y-%m') AS month, "
+            . "CASE WHEN `type` = 'income' THEN `amount_cents` ELSE 0 END AS income_cents, "
+            . "CASE WHEN `type` = 'expense' THEN `amount_cents` ELSE 0 END AS expense_cents "
             . "FROM `transactions` "
             . "WHERE `transaction_date` >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH) "
-            . "GROUP BY month ORDER BY month"
+            . "UNION ALL "
+            . "SELECT DATE_FORMAT(`payment_date`, '%Y-%m'), `amount_cents`, 0 "
+            . "FROM `invoice_payments` "
+            . "WHERE `payment_date` >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)"
+            . ") m GROUP BY `month` ORDER BY `month`"
         )->fetchAll();
 
         $monthMap = [];
@@ -320,7 +328,7 @@ class DashboardApiController extends ApiController
      */
     private function countWhere(\PDO $pdo, string $table, string $where): int
     {
-        $allowed = ['clients', 'projects', 'tasks', 'invoices', 'transactions', 'notes', 'files', 'worklog'];
+        $allowed = ['clients', 'projects', 'tasks', 'invoices', 'invoice_payments', 'transactions', 'notes', 'files', 'worklog'];
         if (!in_array($table, $allowed, true)) {
             throw new \InvalidArgumentException("Neplatná tabulka: {$table}");
         }
@@ -333,7 +341,7 @@ class DashboardApiController extends ApiController
      */
     private function sumWhere(\PDO $pdo, string $table, string $expr, string $where): int
     {
-        $allowed = ['clients', 'projects', 'tasks', 'invoices', 'transactions', 'notes', 'files', 'worklog'];
+        $allowed = ['clients', 'projects', 'tasks', 'invoices', 'invoice_payments', 'transactions', 'notes', 'files', 'worklog'];
         if (!in_array($table, $allowed, true)) {
             throw new \InvalidArgumentException("Neplatná tabulka: {$table}");
         }
