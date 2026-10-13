@@ -17,6 +17,10 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ## [Unreleased]
 
+### Added
+
+- **Data ze staré aplikace DevSuite Pro jsou importovaná do Dev App Pro.** Pracovní deník (34 záznamů + 20 příloh), soubory klientů (8 souborů navázaných na klienta i projekt) a finance (13 transakcí) teď žijí v aktuální aplikaci. Jednorázový skript `cli/import-devsuite.php` mapuje SQLite dump na MariaDB schéma: explicitní mapování klientů a projektů, chybějící zakládá jako archivované (`folder_path=NULL`, sync je nemaže), částky převádí Kč na centy, soubory ukládá do `storage/YYYY/MM/uuid.ext`. Záznamy bez ekvivalentu (sirotčí položky faktur, recurring, e-maily) se nepřenášejí. Skript je idempotentní a má `--dry-run`.
+
 ### Fixed
 
 - **Dashboard graf Příjmy/výdaje a karta „Příjmy" započítávají platby faktur.** Oba čerpaly jen z `transactions`, takže při čistě fakturovaných příjmech byl graf prázdný a Příjmy ukazovaly 0 Kč. `finance_series` nově UNIONuje `invoice_payments` po `payment_date` a `total_income_cents` sčítá transakce + platby; sémantika sjednocená s finance-overview.
