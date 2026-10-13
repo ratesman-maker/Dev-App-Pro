@@ -204,6 +204,7 @@ class InvoiceApiController extends ApiController
         $invoice = $repo->find($id);
 
         $this->maybeFreezePdf($repo, $invoice, 'draft');
+        $this->ensurePaidPayment($invoice);
 
         $notif = $this->repo(NotificationService::class);
         $notif->invoiceCreated((int) ($_SESSION['user_id'] ?? 0), $id, $invoice['invoice_number']);
@@ -238,6 +239,7 @@ class InvoiceApiController extends ApiController
         $invoice = $repo->find($id);
 
         $this->maybeFreezePdf($repo, $invoice, (string) $existing['status']);
+        $this->ensurePaidPayment($invoice);
 
         $notif = $this->repo(NotificationService::class);
         $notif->invoiceUpdated((int) ($_SESSION['user_id'] ?? 0), $id, $invoice['invoice_number']);
@@ -311,6 +313,34 @@ class InvoiceApiController extends ApiController
         }
 
         return $service->generate($id);
+    }
+
+    /**
+     * Přepnutí faktury na 'paid' znamená uhrazení v plné výši — doplní
+     * chybějící platbu do invoice_payments. Bez toho zůstane paid_cents
+     * na nule a statistiky (Celkem zaplaceno, finance-overview) fakturu
+     * nezapočítají, přestože nese status Zaplaceno.
+     * Opačný směr (paid → jiný status) platby nemaže — mohly by být reálné.
+     */
+    private function ensurePaidPayment(array $invoice): void
+    {
+        if (($invoice['status'] ?? '') !== 'paid') {
+            return;
+        }
+        $remaining = (int) $invoice['amount_cents'] - (int) $invoice['paid_cents'];
+        if ($remaining <= 0) {
+            return;
+        }
+        $payRepo = $this->repo(\DevAppPro\Repositories\InvoicePaymentRepository::class);
+        $payRepo->create([
+            'invoice_id'   => (int) $invoice['id'],
+            'amount_cents' => $remaining,
+            'payment_date' => date('Y-m-d'),
+            'method'       => 'bank_transfer',
+            'note'         => 'Automaticky při přepnutí na Zaplaceno',
+        ]);
+        $this->repo(\DevAppPro\Repositories\InvoiceRepository::class)
+            ->recalculatePaid((int) $invoice['id']);
     }
 
     /**

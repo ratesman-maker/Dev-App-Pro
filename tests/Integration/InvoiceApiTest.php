@@ -269,6 +269,73 @@ class InvoiceApiTest extends TestCase
     }
 
     /**
+     * Přepnutí na 'paid' bez zaznamenané platby vytvoří automatickou platbu
+     * v plné výši — jinak zůstane paid_cents=0 a statistiky fakturu
+     * nezapočítají (regrese: statistiky se „neaktualizovaly").
+     */
+    public function test_prepnuti_na_paid_vytvori_automatickou_platbu(): void
+    {
+        $this->login();
+
+        $createResponse = $this->http->post('/api/invoices', [
+            'json' => [
+                'invoice_number'  => '2026010',
+                'subtotal_cents'  => 100000,
+                'vat_rate_percent' => 21,
+                'issue_date'      => '2026-10-13',
+                'due_date'        => '2026-10-27',
+                'items'           => [
+                    ['description' => 'Služba', 'quantity' => 1, 'unit_price_cents' => 100000],
+                ],
+            ],
+            'headers' => [
+                'X-CSRF-Token' => $this->csrfToken,
+            ],
+        ]);
+        $created = json_decode((string) $createResponse->getBody(), true);
+        $id = $created['id'];
+
+        $response = $this->http->request('PUT', '/api/invoices/' . $id, [
+            'json' => ['status' => 'paid'],
+            'headers' => [
+                'X-CSRF-Token' => $this->csrfToken,
+            ],
+        ]);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertSame('paid', $body['status']);
+        $this->assertSame(121000, (int) $body['paid_cents']);
+
+        $paymentsResponse = $this->http->get('/api/invoice-payments?invoice_id=' . $id, [
+            'headers' => [
+                'X-CSRF-Token' => $this->csrfToken,
+            ],
+        ]);
+        $payments = json_decode((string) $paymentsResponse->getBody(), true)['data'];
+        $this->assertCount(1, $payments);
+        $this->assertSame(121000, (int) $payments[0]['amount_cents']);
+        $this->assertSame('bank_transfer', $payments[0]['method']);
+
+        // Opakované přepnutí paid → sent → paid nevytvoří duplicitní platbu
+        $this->http->request('PUT', '/api/invoices/' . $id, [
+            'json' => ['status' => 'sent'],
+            'headers' => ['X-CSRF-Token' => $this->csrfToken],
+        ]);
+        $this->http->request('PUT', '/api/invoices/' . $id, [
+            'json' => ['status' => 'paid'],
+            'headers' => ['X-CSRF-Token' => $this->csrfToken],
+        ]);
+        $paymentsResponse = $this->http->get('/api/invoice-payments?invoice_id=' . $id, [
+            'headers' => [
+                'X-CSRF-Token' => $this->csrfToken,
+            ],
+        ]);
+        $payments = json_decode((string) $paymentsResponse->getBody(), true)['data'];
+        $this->assertCount(1, $payments);
+    }
+
+    /**
      * GET /api/invoices?project_id={id} vrací jen faktury daného projektu.
      */
     public function test_seznam_filtruje_podle_projektu(): void
