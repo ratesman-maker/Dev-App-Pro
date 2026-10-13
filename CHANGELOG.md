@@ -19,6 +19,8 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ### Fixed
 
+- **Dashboard graf Příjmy/výdaje a karta „Příjmy" započítávají platby faktur.** Oba čerpaly jen z `transactions`, takže při čistě fakturovaných příjmech byl graf prázdný a Příjmy ukazovaly 0 Kč. `finance_series` nově UNIONuje `invoice_payments` po `payment_date` a `total_income_cents` sčítá transakce + platby; sémantika sjednocená s finance-overview.
+
 - **Přepnutí faktury na Zaplaceno započítá částku do statistik.** Status `paid` se nastavoval bez záznamu platby, takže `paid_cents` zůstávalo 0 a „Celkem zaplaceno" fakturu ignorovalo. `ensurePaidPayment()` teď při `store` i `update` doplní platbu na zbývající částku (poznámka „Automaticky při přepnutí na Zaplaceno"); symetricky k existujícímu `recalculatePaid`, který platby → status řešil. Faktura 2026004 dostala nápravnou platbu 150 000 Kč.
 
 - **Editace faktury ze seznamu načte položky a neblokuje změnu statusu.** Editační dialog dostával řádek ze seznamu bez položek (vrací je jen detail), takže ukazoval jednu prázdnou položku a validace bránila submitu; při vyplnění by se skutečné položky přepsaly. Nový sdílený hook `useInvoice(id)` dohoní `GET /api/invoices/{id}` v dialogu i detailu; typ `Invoice.items` je nově optional. Regresní E2E spec `invoices.spec.ts` pokrývá celý tok (vystavení → editace → přepnutí na Zaplaceno).
