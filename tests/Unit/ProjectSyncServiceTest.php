@@ -104,6 +104,27 @@ class ProjectSyncServiceTest extends UnitTestCase
     }
 
     /**
+     * Staging složky končící -fix se nesynchronizují (obsah fixů projektů).
+     */
+    public function test_sync_ignoruje_fix_slozky(): void
+    {
+        mkdir($this->watchDir . '/web-cz-fix', 0755);
+        mkdir($this->watchDir . '/web-cz', 0755);
+
+        $service = new ProjectSyncService($this->projects, $this->watchDir);
+        $result = $service->sync();
+
+        $this->assertEquals(1, $result['created']);
+        $this->assertEmpty($result['errors']);
+
+        $fix = $this->projects->findByFolderPath('web-cz-fix');
+        $this->assertNull($fix);
+
+        $web = $this->projects->findByFolderPath('web-cz');
+        $this->assertNotNull($web);
+    }
+
+    /**
      * Symlinky se ignorují.
      */
     public function test_sync_ignoruje_symlinky(): void
