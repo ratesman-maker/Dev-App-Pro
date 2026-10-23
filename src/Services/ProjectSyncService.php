@@ -100,6 +100,11 @@ class ProjectSyncService
                 continue;
             }
 
+            // Ignoruj pomocné/staging složky projektů (obsah fixů, rozpracovaných částí)
+            if (str_ends_with($entry, '-fix')) {
+                continue;
+            }
+
             // Ignoruj symlinky
             if (is_link($fullPath)) {
                 continue;
