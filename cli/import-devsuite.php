@@ -108,22 +108,20 @@ $projectMap = [
     'global'                   => null,
     'gympark'                  => 'new',
     'skloprozeny'              => 'new',
-    'dortemprotirakovinehtml'  => 'new',
-    'dortemprotirakovine'      => 'new', // alias z worklog příloh
-    'akademiefnusa'            => 'new',
-    'fnusahpp'                 => 'new',
+    // Reálné projekty existující jako složka → resolver přes folder_path
+    'dortemprotirakovinehtml'  => 'folder:dortem-proti-rakovine-cz',
+    'dortemprotirakovine'      => 'folder:dortem-proti-rakovine-cz', // alias z worklog příloh
+    // Pouze deníkové záznamy bez reálného projektu → zůstávají bez projektu
+    'akademiefnusa'            => null,
+    'fnusahpp'                 => null,
 ];
 // Výjimky: konkrétní záznamy zakladniskola patří do vývojové kopie (21).
 // Zprovoznění starého webu (5, 14) → ostry (22); redesign → vyvoj (21).
 $zakladniskolaVyvojEntries = [8, 18];
 
 $projectNewMeta = [
-    'gympark'                 => ['name' => 'GymPark Chodov', 'client' => 24],
-    'skloprozeny'             => ['name' => 'skloprozeny.cz', 'client' => 33],
-    'dortemprotirakovinehtml' => ['name' => 'Dortem proti rakovině', 'client' => 34],
-    'dortemprotirakovine'     => 'alias:dortemprotirakovinehtml',
-    'akademiefnusa'           => ['name' => 'Akademie FNUSA', 'client' => 32],
-    'fnusahpp'                => ['name' => 'HPP — FNUSA', 'client' => 32],
+    'gympark'    => ['name' => 'GymPark Chodov', 'client' => 24],
+    'skloprozeny' => ['name' => 'skloprozeny.cz', 'client' => 33],
 ];
 // Projekty, kterým se po importu nastaví client_id podle client_project
 $projectClientBackfill = [
@@ -257,9 +255,6 @@ $createdProjectIds = [];
 foreach ($projectMap as $slug => $target) {
     if ($target === 'new') {
         $meta = $projectNewMeta[$slug] ?? null;
-        if (is_string($meta) && str_starts_with($meta, 'alias:')) {
-            continue; // alias vyřešíme později
-        }
         if ($meta === null) {
             echo "  PŘESKOČENO slug {$slug} (chybí meta)\n";
             $stats['skipped']++;
@@ -290,14 +285,14 @@ foreach ($projectMap as $slug => $target) {
         }
         $stats['projects']++;
         echo "  {$slug} → NEW archived \"{$meta['name']}\" (klient #{$meta['client']})\n";
+    } elseif (is_string($target) && str_starts_with($target, 'folder:')) {
+        $folder = substr($target, 7);
+        $st = $dst->prepare('SELECT id FROM projects WHERE folder_path = ?');
+        $st->execute([$folder]);
+        $resolvedProjects[$slug] = ($id = $st->fetchColumn()) ? (int) $id : null;
+        echo "  {$slug} → folder:{$folder} → #" . var_export($resolvedProjects[$slug], true) . "\n";
     } else {
         $resolvedProjects[$slug] = $target;
-    }
-}
-// Aliasy
-foreach ($projectNewMeta as $slug => $meta) {
-    if (is_string($meta) && str_starts_with($meta, 'alias:')) {
-        $resolvedProjects[$slug] = $resolvedProjects[substr($meta, 6)] ?? null;
     }
 }
 
