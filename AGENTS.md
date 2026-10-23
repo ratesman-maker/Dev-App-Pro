@@ -57,7 +57,10 @@ incidenty.md, restore-fs-cesty-fonty.md, acl-masky-projekty.md) — sem nepatř�
   configtest všem), zapisuje `.user.ini` do docrootu
 - Typy projektů: `wordpress` (wp-config) / `php` (index.php) / `static` (jen HTML —
   vhost bez FPM) — detekce v sync, typ se přepočítává při změně obsahu složky
-- Sync projektů: cron `cli/sync-projects.php`, exclusion list v ProjectSyncService
+- Sync projektů: cron `cli/sync-projects.php`, exclusion list v ProjectSyncService;
+  projekty s `folder_path=NULL` (GymPark Chodov, skloprozeny.cz) jsou importovaná
+  historie z DevSuite — záměr, sync je ignoruje. Import: `cli/import-devsuite.php`,
+  mapování a rozhodnutí v `docs/devsuite-import.md`
 
 ## Workery a fronty (všechny jako root, systemd timery 5 s / cron 1 min)
 

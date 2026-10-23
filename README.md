@@ -245,6 +245,7 @@ Všechny endpointy pod `/api/*`, JSON, vyžadují přihlášení (session), muta
 | `generate-vhosts.php` | Generování Apache vhostů + SSL pro projekty (maže zastaralé) |
 | `restore-backup.php --process-pending` | Worker pro obnovu Duplicator záloh (každou minutu) |
 | `import-duplicator.php <archiv> <slug> [--wait]` | CLI wrapper pro import Duplicator zálohy |
+| `import-devsuite.php --src=<dir> [--dry-run]` | Jednorázový import dat ze staré appky DevSuite (SQLite → MariaDB) |
 | `install-wordpress.php` | Instalace čistého WordPress projektu |
 | `delete-project.php --process-pending` | Worker pro mazání projektů (timer 5 s) |
 | `change-php-version.php --process-pending` | Worker pro změnu PHP verze (timer 5 s) |
@@ -371,5 +372,6 @@ assets/dist/   build výstup frontendu (v .gitignore)
 ## Dokumentace
 
 - [docs/duplicator-import.md](docs/duplicator-import.md) — obnova webů z Duplicator záloh
+- [docs/devsuite-import.md](docs/devsuite-import.md) — import dat ze staré appky DevSuite Pro (worklog, soubory, finance)
 - [AGENTS.md](AGENTS.md) — vývojová pravidla a provozní konvence pro agenty
 - [docs/](docs/) — dokumentace, revize, opravy a post-mortemy incidentů
