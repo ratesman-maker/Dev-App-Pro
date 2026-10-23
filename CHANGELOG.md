@@ -21,6 +21,10 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 - **Data ze staré aplikace DevSuite Pro jsou importovaná do Dev App Pro.** Pracovní deník (34 záznamů + 20 příloh), soubory klientů (8 souborů navázaných na klienta i projekt) a finance (13 transakcí) teď žijí v aktuální aplikaci. Jednorázový skript `cli/import-devsuite.php` mapuje SQLite dump na MariaDB schéma: explicitní mapování klientů a projektů, chybějící zakládá jako archivované (`folder_path=NULL`, sync je nemaže), částky převádí Kč na centy, soubory ukládá do `storage/YYYY/MM/uuid.ext`. Záznamy bez ekvivalentu (sirotčí položky faktur, recurring, e-maily) se nepřenášejí. Skript je idempotentní a má `--dry-run`.
 
+### Changed
+
+- **Sync projektů ignoruje staging složky končící `-fix`.** Pomocné složky `<projekt>-fix` (staging oprav pluginů, rozpracované části) se už nezakládají jako projekty; složky na disku zůstávají nedotčené. Existující řádek `jirijuracek-cz-fix` byl smazán z DB.
+
 ### Fixed
 
 - **Seznam projektů už neobsahuje fiktivní projekty z DevSuite importu.** Slugs použité jen pro záznamy pracovního deníku (akademiefnusa, fnusahpp) zakládaly prázdné archivované projekty; teď se mapují na NULL a záznam drží vazbu přes klienta. Slug dortemprotirakovine se řeší přes `folder_path` na reálný projekt `dortem-proti-rakovine-cz`. Na live DB opraveno: projekty Akademie FNUSA a Dortem proti rakovině (virtuální) smazány, jejich worklog záznamy přemapovány.
