@@ -23,6 +23,8 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ### Fixed
 
+- **Seznam projektů už neobsahuje fiktivní projekty z DevSuite importu.** Slugs použité jen pro záznamy pracovního deníku (akademiefnusa, fnusahpp) zakládaly prázdné archivované projekty; teď se mapují na NULL a záznam drží vazbu přes klienta. Slug dortemprotirakovine se řeší přes `folder_path` na reálný projekt `dortem-proti-rakovine-cz`. Na live DB opraveno: projekty Akademie FNUSA a Dortem proti rakovině (virtuální) smazány, jejich worklog záznamy přemapovány.
+
 - **Dashboard graf Příjmy/výdaje a karta „Příjmy" započítávají platby faktur.** Oba čerpaly jen z `transactions`, takže při čistě fakturovaných příjmech byl graf prázdný a Příjmy ukazovaly 0 Kč. `finance_series` nově UNIONuje `invoice_payments` po `payment_date` a `total_income_cents` sčítá transakce + platby; sémantika sjednocená s finance-overview.
 
 - **Přepnutí faktury na Zaplaceno započítá částku do statistik.** Status `paid` se nastavoval bez záznamu platby, takže `paid_cents` zůstávalo 0 a „Celkem zaplaceno" fakturu ignorovalo. `ensurePaidPayment()` teď při `store` i `update` doplní platbu na zbývající částku (poznámka „Automaticky při přepnutí na Zaplaceno"); symetricky k existujícímu `recalculatePaid`, který platby → status řešil. Faktura 2026004 dostala nápravnou platbu 150 000 Kč.
