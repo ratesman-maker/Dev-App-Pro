@@ -86,6 +86,17 @@ export function DataTable<TData, TValue>({ columns, data, sorting, onSortingChan
                 key={row.id}
                 className={cn('border-t hover:bg-muted/30', onRowClick ? 'cursor-pointer' : '')}
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
+                onKeyDown={
+                  onRowClick
+                    ? (e) => {
+                        if (e.key === 'Enter' && e.target === e.currentTarget) {
+                          e.preventDefault();
+                          onRowClick(row.original);
+                        }
+                      }
+                    : undefined
+                }
               >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className={cn('px-4 py-3', cell.column.columnDef.meta?.width)} style={{ width: cell.column.columnDef.meta?.width }}>
