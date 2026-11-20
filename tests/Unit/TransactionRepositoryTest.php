@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\TransactionRepository;
 use DevAppPro\Repositories\ClientRepository;
@@ -10,8 +12,8 @@ use DevAppPro\Repositories\ProjectRepository;
 
 /**
  * Unit testy pro TransactionRepository (přímo nad DB přes TestCase).
-  * @group finance
  */
+#[Group('finance')]
 class TransactionRepositoryTest extends UnitTestCase
 {
     private TransactionRepository $repo;

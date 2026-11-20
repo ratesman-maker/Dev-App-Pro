@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Invoice Payments API (přes HTTP).
-  * @group invoices
  */
+#[Group('invoices')]
 class InvoicePaymentApiTest extends TestCase
 {
     /**

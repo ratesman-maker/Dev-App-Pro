@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Projects API (přes HTTP).
-  * @group projects
  */
+#[Group('projects')]
 class ProjectApiTest extends TestCase
 {
     /**
@@ -42,9 +44,7 @@ class ProjectApiTest extends TestCase
     /**
      * Login, POST {name:"Web redesign"} → 201, má id, status='active'.
      */
-    /**
-     * @group smoke
-     */
+        #[Group('smoke')]
     public function test_vytvoreni_projektu(): void
     {
         $this->login();

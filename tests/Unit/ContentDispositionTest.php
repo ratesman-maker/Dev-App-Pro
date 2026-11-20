@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\UnitTestCase;
 
 /**
  * Unit testy pro bezpečné hlavičky Content-Disposition (název souboru od uživatele).
- * @group security
  */
+#[Group('security')]
 class ContentDispositionTest extends UnitTestCase
 {
     /**

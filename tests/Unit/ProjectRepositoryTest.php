@@ -3,14 +3,16 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\ProjectRepository;
 use DevAppPro\Repositories\ClientRepository;
 
 /**
  * Unit testy pro ProjectRepository (přímo nad DB přes TestCase).
-  * @group projects
  */
+#[Group('projects')]
 class ProjectRepositoryTest extends UnitTestCase
 {
     private ProjectRepository $repo;

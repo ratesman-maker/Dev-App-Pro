@@ -53,7 +53,15 @@ export function invoiceStatusBadge(status: Invoice['status']): { variant: BadgeV
   }
 }
 
-export function paymentMethodBadge(method: InvoicePayment['method']): { variant: BadgeVariant; label: string } {
+export type PaymentMethod = InvoicePayment['method'];
+
+const PAYMENT_METHODS: readonly PaymentMethod[] = ['cash', 'bank_transfer', 'card', 'other'];
+
+export function isPaymentMethod(value: unknown): value is PaymentMethod {
+  return typeof value === 'string' && (PAYMENT_METHODS as readonly string[]).includes(value);
+}
+
+export function paymentMethodBadge(method: string | null): { variant: BadgeVariant; label: string } {
   switch (method) {
     case 'cash':
       return { variant: 'secondary', label: 'Hotovost' };
@@ -64,7 +72,7 @@ export function paymentMethodBadge(method: InvoicePayment['method']): { variant:
     case 'other':
       return { variant: 'outline', label: 'Jiné' };
     default:
-      return { variant: 'outline', label: method };
+      return { variant: 'outline', label: method ?? '' };
   }
 }
 

@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Security;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Bezpečnostní testy pro CSRF ochranu.
-  * @group security
  */
+#[Group('security')]
 class CsrfTest extends TestCase
 {
     /**

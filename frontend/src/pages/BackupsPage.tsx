@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { HardDriveDownload, Archive, FolderOpen, Loader2, Plus, Package, Trash2 } from 'lucide-react';
 import {
   useBackups,
@@ -11,7 +11,7 @@ import {
   getRestoreStepLabel,
   type Backup,
 } from '@/hooks/useBackups';
-import { useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/toast-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,7 +50,7 @@ export default function BackupsPage() {
   const backups = data?.backups ?? [];
   const dir = data?.dir ?? '';
   const exists = data?.exists ?? false;
-  const restoreJobs = restoreData?.data ?? [];
+  const restoreJobs = useMemo(() => restoreData?.data ?? [], [restoreData]);
   const activeRestores = restoreJobs.filter((r) => isRestoreInProgress(r.status));
 
   // Toast notifikace při dokončení/selhání restore jobu

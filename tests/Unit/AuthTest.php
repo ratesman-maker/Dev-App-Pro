@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\UnitTestCase;
 
 /**
  * Unit testy pro hesla (bcrypt).
-  * @group auth
  */
+#[Group('auth')]
 class AuthTest extends UnitTestCase
 {
     /**

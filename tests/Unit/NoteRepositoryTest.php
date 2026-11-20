@@ -3,14 +3,16 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\NoteRepository;
 use DevAppPro\Repositories\ClientRepository;
 
 /**
  * Unit testy pro NoteRepository (přímo nad DB přes TestCase).
-  * @group notes
  */
+#[Group('notes')]
 class NoteRepositoryTest extends UnitTestCase
 {
     private NoteRepository $repo;

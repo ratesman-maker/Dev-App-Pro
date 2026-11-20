@@ -110,7 +110,7 @@ export function TransactionFormDialog({ open, onClose, transaction, presetProjec
       }
       setErrors({});
     }
-  }, [open, transaction, presetProjectId, presetClientId]);
+  }, [open, transaction, presetProjectId, presetClientId, isPayment]);
 
   const update = <K extends keyof TransactionFormState>(field: K, value: TransactionFormState[K]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
