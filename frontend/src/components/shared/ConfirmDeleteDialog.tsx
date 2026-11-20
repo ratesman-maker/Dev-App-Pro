@@ -55,6 +55,7 @@ export function ConfirmDeleteDialog({
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          aria-label={`Napište ${confirmPhrase} pro potvrzení`}
           placeholder={confirmPhrase}
           autoFocus
           className="mt-2"

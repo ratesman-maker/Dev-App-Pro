@@ -158,6 +158,7 @@ export default function ClientsPage() {
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
+          aria-label="Hledat klienty podle jména nebo e-mailu"
           placeholder="Hledat podle jména nebo e-mailu..."
           value={search}
           onChange={(e) => {

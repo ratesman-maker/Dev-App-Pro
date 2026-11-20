@@ -192,7 +192,7 @@ export default function OverviewTab() {
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Hledat podle popisu, faktury..."
+            aria-label="Hledat podle popisu nebo faktury" placeholder="Hledat podle popisu, faktury..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);

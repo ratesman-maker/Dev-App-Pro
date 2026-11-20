@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -39,12 +39,22 @@ export function DetailModal({
 }: DetailModalProps) {
   const [active, setActive] = useState(defaultTab ?? tabs[0]?.id ?? '');
 
+  // Esc zavírá modal (klávesnice), i když fokus není uvnitř.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className={cn('relative z-50 flex max-h-[90vh] w-full flex-col rounded-lg border bg-popover', sizeMap[size])}>
+      <div className="absolute inset-0 bg-black/60" aria-hidden="true" onClick={onClose} />
+      <div role="dialog" aria-modal="true" aria-label={title} className={cn('relative z-50 flex max-h-[90vh] w-full flex-col rounded-lg border bg-popover', sizeMap[size])}>
         {/* Header — povolí zalamování, aby tlačítka nepřetékala mimo okno */}
         <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b p-6 pb-4">
           <div className="min-w-0 flex-1 space-y-1">

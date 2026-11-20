@@ -52,18 +52,26 @@ export function DataTable<TData, TValue>({ columns, data, sorting, onSortingChan
                   key={header.id}
                   className={cn('px-4 py-3 text-left font-medium', header.column.columnDef.meta?.width)}
                   style={{ width: header.column.columnDef.meta?.width }}
+                  aria-sort={
+                    header.column.getCanSort()
+                      ? ({ asc: 'ascending', desc: 'descending' } as const)[header.column.getIsSorted() as string] ?? 'none'
+                      : undefined
+                  }
                 >
-                  {header.isPlaceholder ? null : (
-                    <div
-                      className={cn('flex items-center gap-1', header.column.getCanSort() ? 'cursor-pointer select-none' : '')}
+                  {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                    <button
+                      type="button"
                       onClick={header.column.getToggleSortingHandler()}
+                      className="flex items-center gap-1 select-none rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
-                      {header.column.getCanSort() && (
-                        <span className="ml-1">
-                          {{ asc: <ChevronUp className="h-4 w-4" />, desc: <ChevronDown className="h-4 w-4" /> }[header.column.getIsSorted() as string] ?? <ChevronsUpDown className="h-4 w-4 opacity-50" />}
-                        </span>
-                      )}
+                      <span className="ml-1" aria-hidden="true">
+                        {{ asc: <ChevronUp className="h-4 w-4" />, desc: <ChevronDown className="h-4 w-4" /> }[header.column.getIsSorted() as string] ?? <ChevronsUpDown className="h-4 w-4 opacity-50" />}
+                      </span>
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                     </div>
                   )}
                 </th>
