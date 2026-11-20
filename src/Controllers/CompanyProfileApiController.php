@@ -27,7 +27,12 @@ class CompanyProfileApiController extends ApiController
      */
     public function handle(): void
     {
+        $this->auth->requireAuth();
+
         $method = $this->getMethod();
+        if (in_array($method, ['PUT', 'PATCH'], true)) {
+            require_csrf();
+        }
         switch ($method) {
             case 'GET':
                 $this->show();

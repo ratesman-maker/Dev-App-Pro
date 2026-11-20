@@ -257,3 +257,17 @@ if (!function_exists('start_of_fiscal_year')) {
         return $fiscalStart->setTime(0, 0, 0);
     }
 }
+
+if (!function_exists('content_disposition')) {
+    /**
+     * Sestaví hlavičku Content-Disposition bezpečně pro libovolný název souboru.
+     * Uvozovky, zpětná lomítka a řídicí znaky z ASCII fallbacku odstraní;
+     * úplný název předá v RFC 5987 tvaru filename*=UTF-8''...
+     */
+    function content_disposition(string $type, string $filename): string
+    {
+        $fallback = preg_replace('/[^\x20-\x7E]/u', '_', $filename) ?? 'soubor';
+        $fallback = str_replace(['"', '\\'], '_', $fallback);
+        return $type . '; filename="' . $fallback . '"; filename*=UTF-8\'\'' . rawurlencode($filename);
+    }
+}

@@ -15,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DetailModal, type DetailModalTab } from '@/components/shared/DetailModal';
 import { ProjectFormDialog } from '@/components/projects/ProjectFormDialog';
 import { CredentialFormDialog } from '@/components/projects/CredentialFormDialog';
-import { useProjectCredentials, useDeleteCredential, CREDENTIAL_TYPE_LABELS, type ProjectCredential } from '@/hooks/useProjectCredentials';
+import { useProjectCredentials, useDeleteCredential, fetchCredentialPassword, CREDENTIAL_TYPE_LABELS, type ProjectCredential } from '@/hooks/useProjectCredentials';
 import { TransactionFormDialog } from '@/components/finance/TransactionFormDialog';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -134,7 +134,8 @@ export function ProjectDetailModal({ open, onClose, projectId }: ProjectDetailMo
   const [credFormOpen, setCredFormOpen] = useState(false);
   const [editCredential, setEditCredential] = useState<ProjectCredential | null>(null);
   const [deleteCredential, setDeleteCredential] = useState<ProjectCredential | null>(null);
-  const [revealedPasswords, setRevealedPasswords] = useState<Record<number, boolean>>({});
+  // Heslo se načítá z detailu až po kliknutí na zobrazení; drží se jen v paměti okna.
+  const [revealedPasswords, setRevealedPasswords] = useState<Record<number, string>>({});
 
   const { data: project, isLoading, isError, error } = useQuery<Project>({
     queryKey: ['project', projectId],
@@ -494,7 +495,7 @@ export function ProjectDetailModal({ open, onClose, projectId }: ProjectDetailMo
           ) : (
             <div className="space-y-2">
               {credentials.map((cred) => {
-                const revealed = revealedPasswords[cred.id] ?? false;
+                const revealed = cred.id in revealedPasswords;
                 const typeLabel = CREDENTIAL_TYPE_LABELS[cred.type] ?? cred.type;
                 return (
                   <Card key={cred.id}>
@@ -539,16 +540,27 @@ export function ProjectDetailModal({ open, onClose, projectId }: ProjectDetailMo
                             <dd className="min-w-0 break-all font-mono">{cred.username}</dd>
                           </>
                         )}
-                        {cred.password && (
+                        {cred.has_password && (
                           <>
                             <dt className="text-muted-foreground">Heslo</dt>
                             <dd className="flex min-w-0 items-center gap-1 font-mono">
-                              <span className="truncate">{revealed ? cred.password : '••••••••'}</span>
+                              <span className="truncate">{revealed ? revealedPasswords[cred.id] : '••••••••'}</span>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6 shrink-0"
-                                onClick={() => setRevealedPasswords((prev) => ({ ...prev, [cred.id]: !prev[cred.id] }))}
+                                onClick={async () => {
+                                  if (revealed) {
+                                    setRevealedPasswords((prev) => {
+                                      const next = { ...prev };
+                                      delete next[cred.id];
+                                      return next;
+                                    });
+                                    return;
+                                  }
+                                  const pw = await fetchCredentialPassword(cred.id);
+                                  setRevealedPasswords((prev) => ({ ...prev, [cred.id]: pw }));
+                                }}
                                 title={revealed ? 'Skrýt' : 'Zobrazit'}
                               >
                                 {revealed ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
@@ -557,7 +569,10 @@ export function ProjectDetailModal({ open, onClose, projectId }: ProjectDetailMo
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6 shrink-0"
-                                onClick={() => navigator.clipboard.writeText(cred.password ?? '')}
+                                onClick={async () => {
+                                  const pw = revealed ? revealedPasswords[cred.id] : await fetchCredentialPassword(cred.id);
+                                  await navigator.clipboard.writeText(pw);
+                                }}
                                 title="Kopírovat"
                               >
                                 <Copy className="h-3 w-3" />

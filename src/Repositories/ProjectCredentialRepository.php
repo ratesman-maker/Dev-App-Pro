@@ -38,7 +38,8 @@ class ProjectCredentialRepository extends Repository
     }
 
     /**
-     * Vrátí všechny přístupy pro projekt (s dešifrovaným heslem).
+     * Vrátí všechny přístupy pro projekt. Heslo se nevrací, jen příznak has_password.
+     * Heslo se dešifruje až v find($id, true) (detail).
      */
     public function allForProject(int $projectId): array
     {
@@ -49,7 +50,7 @@ class ProjectCredentialRepository extends Repository
         $rows = $stmt->fetchAll();
 
         foreach ($rows as &$row) {
-            $row['password'] = $this->crypto->decrypt((string) ($row['password_encrypted'] ?? ''));
+            $row['has_password'] = ($row['password_encrypted'] ?? '') !== '' && $row['password_encrypted'] !== null;
             unset($row['password_encrypted']);
         }
         unset($row);
@@ -58,9 +59,9 @@ class ProjectCredentialRepository extends Repository
     }
 
     /**
-     * Najde přístup podle ID (s dešifrovaným heslem).
+     * Najde přístup podle ID. Heslo se dešifruje jen při $withPassword = true (detail).
      */
-    public function find(int $id): ?array
+    public function find(int $id, bool $withPassword = false): ?array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM `{$this->table}` WHERE `id` = ?");
         $stmt->execute([$id]);
@@ -70,7 +71,10 @@ class ProjectCredentialRepository extends Repository
             return null;
         }
 
-        $row['password'] = $this->crypto->decrypt((string) ($row['password_encrypted'] ?? ''));
+        $row['has_password'] = ($row['password_encrypted'] ?? '') !== '' && $row['password_encrypted'] !== null;
+        if ($withPassword) {
+            $row['password'] = $this->crypto->decrypt((string) ($row['password_encrypted'] ?? ''));
+        }
         unset($row['password_encrypted']);
 
         return $row;

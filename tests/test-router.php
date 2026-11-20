@@ -13,6 +13,12 @@ if (!str_ends_with(getenv('DB_NAME') ?: 'devapppro_test', '_test')) {
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+// Stejné přepisy jako .htaccess: /api/projects/{id}/credentials → api/project-credentials.php
+if (preg_match('#^/api/projects/[0-9]+/credentials/?$#', $uri)) {
+    require __DIR__ . '/../api/project-credentials.php';
+    return true;
+}
+
 // API endpointy - první segment určuje soubor (např. /api/auth/login → api/auth.php)
 if (preg_match('#^/api/([a-z-]+)(/.*)?$#', $uri, $m)) {
     $file = __DIR__ . '/../api/' . $m[1] . '.php';

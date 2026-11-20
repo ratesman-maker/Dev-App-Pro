@@ -11,7 +11,9 @@ export interface ProjectCredential {
   host: string | null;
   port: number | null;
   username: string | null;
-  password: string | null;
+  /** Heslo se v seznamu nevrací; detail ho načte přes fetchCredentialPassword(). */
+  password?: string | null;
+  has_password: boolean;
   database_name: string | null;
   extra: string | null;
   note: string | null;
@@ -41,6 +43,11 @@ export const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {
   api: 'API',
   other: 'Ostatní',
 };
+
+/** Načte heslo konkrétního přístupu (detail, jen na vyžádání uživatelem). */
+export function fetchCredentialPassword(id: number): Promise<string> {
+  return api.get<ProjectCredential>(`/project-credentials/${id}`).then((c) => c.password ?? '');
+}
 
 export function useProjectCredentials(projectId: number | null) {
   return useQuery({
