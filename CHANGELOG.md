@@ -29,6 +29,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ### Fixed
 
+- **IČO a DIČ jdou zadat i u fyzické osoby, takže se propíšou na faktury.** Formulář nastavení zobrazoval IČO a DIČ jen u firmy a při přepnutí na fyzickou osobu je mazal. OSVČ tak neměla IČO ani na faktuře. Pole jsou teď vidět u všech typů a přepnutí je nemaže.
 - **Řádky tabulek s otevíráním detailu jdou ovládat klávesnicí.** Řádek na nástěnce (klienti, projekty) dostal `tabIndex` a Enter otevře detail; dříve šel otevřít jen myší.
 - **Dialogy a řazení tabulek jsou přístupné klávesnicí a čtečkou obrazovky.** Dialog má `role="dialog"` a `aria-modal`, zavírá se klávesou Esc a drží fokus uvnitř. Sloupce řazení v `DataTable` jsou tlačítka s `aria-sort`, dříve šlo o klikatelné `div`. Vyhledávání klientů má popisek.
 - **Vyhledávací, datumová a položkové fáze formulářů mají popisky.** Pole bez popisku (jen `placeholder`) dostala `aria-label`, u položek faktury včetně čísla řádku. Detail klienta/projektu se chová jako dialog (`role="dialog"`, `aria-modal`, Esc). Zóna pro nahrání souborů jde ovládat klávesnicí (`role="button"`, Enter a mezerník).
