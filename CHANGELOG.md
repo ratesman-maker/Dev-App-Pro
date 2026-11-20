@@ -23,6 +23,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ### Changed
 
+- **Nástěnka se vykreslí rychleji, graf příjmů a výdajů se načte zvlášť.** Graf (recharts) je v `components/dashboard/FinanceAreaChart.tsx` a načítá se líně; hlavní kód nástěnky klesl z 376 kB na 15 kB. Recharts se na nástěnce stáhne i tak, jen později.
 - **Sync projektů ignoruje staging složky končící `-fix`.** Pomocné složky `<projekt>-fix` (staging oprav pluginů, rozpracované části) se už nezakládají jako projekty; složky na disku zůstávají nedotčené. Existující řádek `jirijuracek-cz-fix` byl smazán z DB.
 
 ### Fixed
