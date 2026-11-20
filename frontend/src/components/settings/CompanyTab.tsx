@@ -42,10 +42,9 @@ export function CompanyTab() {
   const updateType = (newType: 'individual' | 'company' | 'nonprofit' | 'government') => {
     setForm((prev) => {
       const next = { ...prev, type: newType };
+      // IČO a DIČ se při přepnutí typu nemažou (OSVČ je má také).
       if (newType === 'individual') {
         next.company_name = '';
-        next.ico = '';
-        next.dic = '';
       } else {
         next.first_name = '';
         next.last_name = '';
@@ -140,26 +139,28 @@ export function CompanyTab() {
                   onChange={(e) => update('company_name', e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="cp-ico">IČO</Label>
-                  <Input
-                    id="cp-ico"
-                    value={form.ico ?? ''}
-                    onChange={(e) => update('ico', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="cp-dic">DIČ</Label>
-                  <Input
-                    id="cp-dic"
-                    value={form.dic ?? ''}
-                    onChange={(e) => update('dic', e.target.value)}
-                  />
-                </div>
-              </div>
             </div>
           )}
+
+          {/* IČO a DIČ patří i fyzické osobě (OSVČ), proto mimo větvení podle typu */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="cp-ico">IČO</Label>
+              <Input
+                id="cp-ico"
+                value={form.ico ?? ''}
+                onChange={(e) => update('ico', e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cp-dic">DIČ</Label>
+              <Input
+                id="cp-dic"
+                value={form.dic ?? ''}
+                onChange={(e) => update('dic', e.target.value)}
+              />
+            </div>
+          </div>
 
           {/* Společné */}
           <div className="grid grid-cols-2 gap-4">
