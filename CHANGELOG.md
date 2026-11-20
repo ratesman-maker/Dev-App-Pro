@@ -42,6 +42,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ### Security
 
+- **Název PDF faktury v hlavičce stahování je bezpečný.** Hlavička `Content-Disposition` u faktury skládala název přímo, takže uvozovka nebo znak mimo ASCII v čísle faktury rozbila hlavičku. Teď jde přes `content_disposition()` jako u ostatních stahování.
 - **Hesla k projektovým přístupům se neposílají v seznamu.** `GET /api/projects/{id}/credentials` vrací jen příznak `has_password`; heslo je v detailu `GET /api/project-credentials/{id}` a v UI se načte až na kliknutí (zobrazit, kopírovat). Úprava přístupu bez pole `password` ponechá stávající heslo, dříve se přepsalo prázdným řetězcem.
 - **Názvy souborů v hlavičkách stahování jsou bezpečné.** `Content-Disposition` se sestavuje přes `content_disposition()` (uvozovky a lomítka se nahradí, plný název jde v `filename*`). SVG a soubory bez náhledu se servírují jen jako stažení, nikdy inline.
 - **Nastavení a profil firmy vyžadují přihlášení a CSRF v dispatchi.** `SettingsApiController` a `CompanyProfileApiController` mají `requireAuth` a `require_csrf` v `handle()`, ne jen v jednotlivých metodách.

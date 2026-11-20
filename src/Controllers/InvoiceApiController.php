@@ -180,7 +180,7 @@ class InvoiceApiController extends ApiController
         $filename .= '.pdf';
 
         header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: ' . content_disposition('attachment', $filename));
         header('Content-Length: ' . strlen($pdf));
         echo $pdf;
         exit;
