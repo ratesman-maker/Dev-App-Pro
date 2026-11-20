@@ -337,6 +337,7 @@ export function InvoiceFormDialog({ open, onClose, invoice, presetClientId }: In
                 <div key={index} className="grid grid-cols-12 items-center gap-2">
                   <div className="col-span-5">
                     <Input
+                      aria-label={`Popis položky ${index + 1}`}
                       value={item.description}
                       onChange={(e) => updateItem(index, 'description', e.target.value)}
                       placeholder="např. Tvorba webu"
@@ -347,12 +348,14 @@ export function InvoiceFormDialog({ open, onClose, invoice, presetClientId }: In
                       type="number"
                       min="0"
                       step="0.001"
+                      aria-label={`Množství položky ${index + 1}`}
                       value={item.quantity}
                       onChange={(e) => updateItem(index, 'quantity', e.target.value)}
                     />
                   </div>
                   <div className="col-span-2">
                     <Input
+                      aria-label={`Jednotka položky ${index + 1}`}
                       value={item.unit}
                       onChange={(e) => updateItem(index, 'unit', e.target.value)}
                       placeholder="ks, hod, měs"
@@ -363,6 +366,7 @@ export function InvoiceFormDialog({ open, onClose, invoice, presetClientId }: In
                       type="number"
                       min="0"
                       step="0.01"
+                      aria-label={`Cena za jednotku, položka ${index + 1}`}
                       value={item.unit_price}
                       onChange={(e) => updateItem(index, 'unit_price', e.target.value)}
                     />

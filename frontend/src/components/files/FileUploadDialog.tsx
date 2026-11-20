@@ -90,6 +90,15 @@ export function FileUploadDialog({ open, onClose }: FileUploadDialogProps) {
             handleFiles(e.dataTransfer.files);
           }}
           onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              inputRef.current?.click();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Vybrat soubory k nahrání"
           className={`flex cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed p-8 text-center transition-colors ${
             dragOver ? 'border-primary bg-primary/5' : 'border-input hover:border-primary/50'
           }`}

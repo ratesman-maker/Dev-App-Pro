@@ -164,7 +164,7 @@ export default function TransactionsTab() {
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Hledat podle popisu..."
+            aria-label="Hledat transakce podle popisu" placeholder="Hledat podle popisu..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
