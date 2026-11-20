@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\InvoiceRepository;
 use DevAppPro\Repositories\InvoicePaymentRepository;
@@ -11,8 +13,8 @@ use DevAppPro\Repositories\ProjectRepository;
 
 /**
  * Unit testy pro InvoiceRepository (přímo nad DB přes TestCase).
-  * @group invoices
  */
+#[Group('invoices')]
 class InvoiceRepositoryTest extends UnitTestCase
 {
     private InvoiceRepository $repo;

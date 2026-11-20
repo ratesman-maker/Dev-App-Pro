@@ -14,7 +14,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { TransactionFormDialog } from '@/components/finance/TransactionFormDialog';
-import { PER_PAGE, transactionCategoryBadge, paymentMethodBadge } from '@/components/finance/financeHelpers';
+import { PER_PAGE, transactionCategoryBadge, paymentMethodBadge, isPaymentMethod } from '@/components/finance/financeHelpers';
 import { useFinanceOverview, type FinanceOverviewItem } from '@/hooks/useFinanceOverview';
 import { useDeleteTransaction, type Transaction } from '@/hooks/useTransactions';
 import { useUpdateInvoicePayment, useDeleteInvoicePayment } from '@/hooks/useInvoicePayments';
@@ -120,7 +120,7 @@ export default function OverviewTab() {
           const badge = transactionCategoryBadge(row.original.category as Transaction['category']);
           return <Badge variant={badge.variant}>{badge.label}</Badge>;
         }
-        const badge = paymentMethodBadge(row.original.payment_method as any);
+        const badge = paymentMethodBadge(row.original.payment_method);
         return <Badge variant={badge.variant}>{badge.label}</Badge>;
       },
     },
@@ -479,7 +479,7 @@ function PaymentEditDialog({ item, editMode, onClose, onToggleEdit }: PaymentEdi
         data: {
           amount_cents: Math.round(Number(form.amount_cents) * 100),
           payment_date: form.payment_date,
-          method: form.method as any,
+          method: isPaymentMethod(form.method) ? form.method : 'other',
           note: form.note.trim() || null,
         },
       });
@@ -512,7 +512,7 @@ function PaymentEditDialog({ item, editMode, onClose, onToggleEdit }: PaymentEdi
               <span className="font-medium">+{fmtMoney(item.amount_cents)}</span>
             } />
             <DetailField label="Faktura" value={item.invoice_number ?? '—'} />
-            <DetailField label="Metoda" value={paymentMethodBadge(item.payment_method as any).label} />
+            <DetailField label="Metoda" value={paymentMethodBadge(item.payment_method).label} />
             <DetailField label="Datum" value={fmtDate(item.date)} />
             <DetailField label="Projekt" value={item.project_name ?? '—'} />
             <DetailField label="Klient" value={item.client_name || '—'} />

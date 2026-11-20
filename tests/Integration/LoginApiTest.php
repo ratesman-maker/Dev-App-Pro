@@ -3,20 +3,20 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro login API.
-  * @group auth
  */
+#[Group('auth')]
 class LoginApiTest extends TestCase
 {
     /**
      * Úspěšné přihlášení s admin/test123 → 200, user data.
      */
-    /**
-     * @group smoke
-     */
+        #[Group('smoke')]
     public function test_uspesne_prihlaseni(): void
     {
         $response = $this->http->post('/api/auth/login', [

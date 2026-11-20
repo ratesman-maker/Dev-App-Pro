@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Security;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Bezpečnostní testy pro autorizaci.
-  * @group security
  */
+#[Group('security')]
 class AuthorizationTest extends TestCase
 {
     /**
@@ -24,9 +26,7 @@ class AuthorizationTest extends TestCase
      * Veřejné endpointy nevyžadují přihlášení (nevrátí 401).
      * POST /api/auth/login, POST /api/auth/password-hint, POST /api/auth/reset-password.
      */
-    /**
-     * @group smoke
-     */
+        #[Group('smoke')]
     public function test_public_endpointy_nevyaduji_prihlaseni(): void
     {
         // Login endpoint - ne 401 (špatné heslo dá 401, ale to je kvůli špatným údajům,

@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Notes API (přes HTTP).
-  * @group notes
  */
+#[Group('notes')]
 class NoteApiTest extends TestCase
 {
     /**
@@ -61,9 +63,7 @@ class NoteApiTest extends TestCase
     /**
      * Login, POST {content:"Test"} → 201.
      */
-    /**
-     * @group smoke
-     */
+        #[Group('smoke')]
     public function test_vytvoreni_poznamky(): void
     {
         $this->login();

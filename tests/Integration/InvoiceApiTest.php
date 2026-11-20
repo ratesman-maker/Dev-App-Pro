@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Invoices API (přes HTTP).
-  * @group invoices
  */
+#[Group('invoices')]
 class InvoiceApiTest extends TestCase
 {
     /**
@@ -42,9 +44,7 @@ class InvoiceApiTest extends TestCase
     /**
      * POST vytvoření faktury → 201, vat_amount_cents=21000, amount_cents=121000.
      */
-    /**
-     * @group smoke
-     */
+        #[Group('smoke')]
     public function test_vytvoreni_faktury(): void
     {
         $this->login();

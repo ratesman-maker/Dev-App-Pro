@@ -3,13 +3,15 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Dashboard API (přes HTTP).
  * Nová nástěnka: kpis + klienti + projekty s agregacemi + pás "Co řešit".
-  * @group dashboard
  */
+#[Group('dashboard')]
 class DashboardApiTest extends TestCase
 {
     /**
@@ -100,9 +102,7 @@ class DashboardApiTest extends TestCase
     /**
      * Login, GET /api/dashboard → 200, má kpis/clients/projects/attention.
      */
-    /**
-     * @group smoke
-     */
+        #[Group('smoke')]
     public function test_dashboard_po_prihlaseni_vrati_200(): void
     {
         $this->login();

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Services\ProjectSyncService;
 use DevAppPro\Repositories\ProjectRepository;
@@ -10,8 +12,8 @@ use DevAppPro\Repositories\ProjectRepository;
 /**
  * Unit testy pro ProjectSyncService.
  * Používá dočasný adresář pro simulaci PROJECTS_WATCH_DIR.
-  * @group projects
  */
+#[Group('projects')]
 class ProjectSyncServiceTest extends UnitTestCase
 {
     protected string $watchDir;

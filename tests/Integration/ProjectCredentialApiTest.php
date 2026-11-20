@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro přístupy k projektům: heslo jen v detailu, ne v seznamu.
- * @group security
  */
+#[Group('security')]
 class ProjectCredentialApiTest extends TestCase
 {
     /**

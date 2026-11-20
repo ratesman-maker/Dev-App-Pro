@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro reset hesla API.
-  * @group auth
  */
+#[Group('auth')]
 class ResetPasswordApiTest extends TestCase
 {
     /**

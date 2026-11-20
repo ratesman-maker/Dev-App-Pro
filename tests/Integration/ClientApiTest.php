@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Integrační testy pro Clients API (přes HTTP).
-  * @group clients
  */
+#[Group('clients')]
 class ClientApiTest extends TestCase
 {
     /**
@@ -42,9 +44,7 @@ class ClientApiTest extends TestCase
     /**
      * Login, POST osoba → 201, má full_name="Jan Novák".
      */
-    /**
-     * @group smoke
-     */
+        #[Group('smoke')]
     public function test_vytvoreni_osoby(): void
     {
         $this->login();

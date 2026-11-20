@@ -3,14 +3,16 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\UnitTestCase;
 use DevAppPro\Repositories\FileRepository;
 use DevAppPro\Repositories\ClientRepository;
 
 /**
  * Unit testy pro FileRepository (přímo nad DB přes TestCase).
-  * @group files
  */
+#[Group('files')]
 class FileRepositoryTest extends UnitTestCase
 {
     private FileRepository $repo;

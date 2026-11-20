@@ -1,29 +1,6 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { useState, useCallback, type ReactNode } from 'react';
 import { CheckCircle2, AlertTriangle, XCircle, X } from 'lucide-react';
-
-type ToastType = 'success' | 'warning' | 'error';
-
-interface Toast {
-  id: number;
-  type: ToastType;
-  title: string;
-  message?: string;
-}
-
-interface ToastContextValue {
-  toast: (type: ToastType, title: string, message?: string) => void;
-  success: (title: string, message?: string) => void;
-  warning: (title: string, message?: string) => void;
-  error: (title: string, message?: string) => void;
-}
-
-const ToastContext = createContext<ToastContextValue | null>(null);
-
-export function useToast() {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast musí být použit uvnitř ToastProvider');
-  return ctx;
-}
+import { ToastContext, type ToastContextValue, type Toast, type ToastType } from '@/components/ui/toast-context';
 
 const toastConfig: Record<ToastType, {
   icon: typeof CheckCircle2;

@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Security;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Tests\TestCase;
 
 /**
  * Bezpečnostní testy pro rate limiting.
-  * @group security
  */
+#[Group('security')]
 class RateLimitTest extends TestCase
 {
     /**

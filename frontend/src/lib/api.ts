@@ -71,7 +71,7 @@ export const api = {
     if (!res.ok) throw new ApiError(res.status, await res.json());
     return res.blob();
   },
-  async upload(path: string, formData: FormData): Promise<any> {
+  async upload<T = unknown>(path: string, formData: FormData): Promise<T> {
     const res = await fetch(`/api${path}`, {
       method: 'POST',
       headers: { 'X-CSRF-Token': getCsrfToken() },

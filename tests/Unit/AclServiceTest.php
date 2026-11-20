@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace DevAppPro\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use DevAppPro\Services\AclService;
 use DevAppPro\Tests\UnitTestCase;
 
@@ -10,8 +12,8 @@ use DevAppPro\Tests\UnitTestCase;
  * Unit testy pro AclService::normalizeProjectTree.
  * Regrese: soubory vytvořené s mkdir 0755/chmod 0644 oříznou ACL masku
  * → www-data/ratesman ztratí zápis → selhávají WP updaty (viz docs/acl-masky-projekty.md).
- * @group projects
  */
+#[Group('projects')]
 class AclServiceTest extends UnitTestCase
 {
     private string $tmpDir;
