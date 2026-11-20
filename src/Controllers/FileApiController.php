@@ -62,7 +62,7 @@ class FileApiController extends ApiController
         'jpeg' => ['image/jpeg'],
         'gif'  => ['image/gif'],
         'webp' => ['image/webp'],
-        'svg'  => ['image/svg+xml', 'text/html'],
+        'svg'  => ['image/svg+xml'],
         'txt'  => ['text/plain'],
         'csv'  => ['text/csv', 'text/plain', 'application/csv'],
         'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
@@ -220,7 +220,7 @@ class FileApiController extends ApiController
         }
 
         header('Content-Type: ' . $file['mime_type']);
-        header('Content-Disposition: attachment; filename="' . $file['original_name'] . '"');
+        header('Content-Disposition: ' . content_disposition('attachment', (string) $file['original_name']));
         header('Content-Length: ' . $file['size_bytes']);
         readfile($fullPath);
     }
@@ -267,6 +267,11 @@ class FileApiController extends ApiController
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . filesize($fullPath));
         header('Cache-Control: public, max-age=31536000, immutable');
+        // Inline jen pro rastrové obrázky; SVG a ostatní soubory vždy jako stažení
+        $isImage = (int) ($file['is_image'] ?? 0) === 1 && $mime !== 'image/svg+xml';
+        if (!$isImage) {
+            header('Content-Disposition: ' . content_disposition('attachment', (string) $file['original_name']));
+        }
         readfile($fullPath);
     }
 

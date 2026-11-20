@@ -35,6 +35,12 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 - **Editace faktury ze seznamu načte položky a neblokuje změnu statusu.** Editační dialog dostával řádek ze seznamu bez položek (vrací je jen detail), takže ukazoval jednu prázdnou položku a validace bránila submitu; při vyplnění by se skutečné položky přepsaly. Nový sdílený hook `useInvoice(id)` dohoní `GET /api/invoices/{id}` v dialogu i detailu; typ `Invoice.items` je nově optional. Regresní E2E spec `invoices.spec.ts` pokrývá celý tok (vystavení → editace → přepnutí na Zaplaceno).
 
+### Security
+
+- **Hesla k projektovým přístupům se neposílají v seznamu.** `GET /api/projects/{id}/credentials` vrací jen příznak `has_password`; heslo je v detailu `GET /api/project-credentials/{id}` a v UI se načte až na kliknutí (zobrazit, kopírovat). Úprava přístupu bez pole `password` ponechá stávající heslo, dříve se přepsalo prázdným řetězcem.
+- **Názvy souborů v hlavičkách stahování jsou bezpečné.** `Content-Disposition` se sestavuje přes `content_disposition()` (uvozovky a lomítka se nahradí, plný název jde v `filename*`). SVG a soubory bez náhledu se servírují jen jako stažení, nikdy inline.
+- **Nastavení a profil firmy vyžadují přihlášení a CSRF v dispatchi.** `SettingsApiController` a `CompanyProfileApiController` mají `requireAuth` a `require_csrf` v `handle()`, ne jen v jednotlivých metodách.
+
 ## [1.1.0] - 2026-10-08
 
 ### Added

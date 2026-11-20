@@ -12,6 +12,7 @@ import {
   type CredentialInput,
   type CredentialType,
   CREDENTIAL_TYPE_LABELS,
+  fetchCredentialPassword,
 } from '@/hooks/useProjectCredentials';
 import { ApiError } from '@/lib/api';
 
@@ -54,6 +55,8 @@ export function CredentialFormDialog({ open, onClose, projectId, credential }: C
   const [form, setForm] = useState<CredentialInput>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
+  // Heslo se u úpravy načítá z detailu; posílá se jen když ho uživatel změnil.
+  const [passwordTouched, setPasswordTouched] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -64,13 +67,19 @@ export function CredentialFormDialog({ open, onClose, projectId, credential }: C
           host: credential.host ?? '',
           port: credential.port ?? null,
           username: credential.username ?? '',
-          password: credential.password ?? '',
+          password: '',
           database_name: credential.database_name ?? '',
           extra: credential.extra ?? '',
           note: credential.note ?? '',
         });
+        setPasswordTouched(false);
+        // Doplnit heslo jen pokud uživatel mezitím nic nenapsal (pole je stále prázdné)
+        fetchCredentialPassword(credential.id)
+          .then((pw) => setForm((prev) => (prev.password ? prev : { ...prev, password: pw })))
+          .catch(() => undefined);
       } else {
         setForm(emptyForm);
+        setPasswordTouched(false);
       }
       setErrors({});
       setShowPassword(false);
@@ -78,6 +87,7 @@ export function CredentialFormDialog({ open, onClose, projectId, credential }: C
   }, [open, credential]);
 
   const update = (field: keyof CredentialInput, value: string | number | null) => {
+    if (field === 'password') setPasswordTouched(true);
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -103,7 +113,9 @@ export function CredentialFormDialog({ open, onClose, projectId, credential }: C
     ev.preventDefault();
     if (!validate()) return;
     try {
-      await mutation.mutateAsync(form);
+      // Úprava bez změny hesla: pole se neposílá, backend ponechá stávající heslo
+      const payload = isEdit && !passwordTouched ? { ...form, password: undefined } : form;
+      await mutation.mutateAsync(payload);
       onClose();
     } catch (err) {
       if (err instanceof ApiError && err.body.fields) {

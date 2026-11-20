@@ -334,12 +334,12 @@ class WorklogApiController extends ApiController
 
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . filesize($fullPath));
-        if ($isImage) {
-            header('Content-Disposition: inline; filename="' . $att['original_name'] . '"');
+        if ($isImage && $mime !== 'image/svg+xml') {
+            header('Content-Disposition: ' . content_disposition('inline', (string) $att['original_name']));
             // Cache pro obrázky (neměnné)
             header('Cache-Control: private, max-age=86400, immutable');
         } else {
-            header('Content-Disposition: attachment; filename="' . $att['original_name'] . '"');
+            header('Content-Disposition: ' . content_disposition('attachment', (string) $att['original_name']));
         }
         readfile($fullPath);
     }

@@ -105,7 +105,7 @@ class ProjectCredentialApiController extends ApiController
     protected function showCredential(int $id): void
     {
         $repo = $this->repo(\DevAppPro\Repositories\ProjectCredentialRepository::class);
-        $credential = $repo->find($id);
+        $credential = $repo->find($id, true);
         if ($credential === null) {
             $this->jsonError('Přístup nenalezen.', 404);
             return;
@@ -258,9 +258,11 @@ class ProjectCredentialApiController extends ApiController
                 $fields['password'] = 'Pole password je příliš dlouhé (max 100 znaků).';
             }
             $data['password'] = $password;
-        } else {
+        } elseif ($id === null) {
+            // Vytvoření bez hesla: prázdné heslo
             $data['password'] = '';
         }
+        // Úprava bez pole password: stávající heslo se ponechá (nepřepisovat prázdným řetězcem)
 
         // database_name - volitelný
         $dbName = $input['database_name'] ?? null;
