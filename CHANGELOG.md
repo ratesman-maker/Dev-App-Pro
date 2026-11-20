@@ -27,6 +27,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ### Fixed
 
+- **Dialogy a řazení tabulek jsou přístupné klávesnicí a čtečkou obrazovky.** Dialog má `role="dialog"` a `aria-modal`, zavírá se klávesou Esc a drží fokus uvnitř. Sloupce řazení v `DataTable` jsou tlačítka s `aria-sort`, dříve šlo o klikatelné `div`. Vyhledávání klientů má popisek.
 - **Seznam projektů už neobsahuje fiktivní projekty z DevSuite importu.** Slugs použité jen pro záznamy pracovního deníku (akademiefnusa, fnusahpp) zakládaly prázdné archivované projekty; teď se mapují na NULL a záznam drží vazbu přes klienta. Slug dortemprotirakovine se řeší přes `folder_path` na reálný projekt `dortem-proti-rakovine-cz`. Na live DB opraveno: projekty Akademie FNUSA a Dortem proti rakovině (virtuální) smazány, jejich worklog záznamy přemapovány.
 
 - **Dashboard graf Příjmy/výdaje a karta „Příjmy" započítávají platby faktur.** Oba čerpaly jen z `transactions`, takže při čistě fakturovaných příjmech byl graf prázdný a Příjmy ukazovaly 0 Kč. `finance_series` nově UNIONuje `invoice_payments` po `payment_date` a `total_income_cents` sčítá transakce + platby; sémantika sjednocená s finance-overview.
