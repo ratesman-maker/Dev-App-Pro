@@ -27,6 +27,7 @@ projekt používá [Semantic Versioning](https://semver.org/lang/cs/).
 
 ### Fixed
 
+- **Řádky tabulek s otevíráním detailu jdou ovládat klávesnicí.** Řádek na nástěnce (klienti, projekty) dostal `tabIndex` a Enter otevře detail; dříve šel otevřít jen myší.
 - **Dialogy a řazení tabulek jsou přístupné klávesnicí a čtečkou obrazovky.** Dialog má `role="dialog"` a `aria-modal`, zavírá se klávesou Esc a drží fokus uvnitř. Sloupce řazení v `DataTable` jsou tlačítka s `aria-sort`, dříve šlo o klikatelné `div`. Vyhledávání klientů má popisek.
 - **Vyhledávací, datumová a položkové fáze formulářů mají popisky.** Pole bez popisku (jen `placeholder`) dostala `aria-label`, u položek faktury včetně čísla řádku. Detail klienta/projektu se chová jako dialog (`role="dialog"`, `aria-modal`, Esc). Zóna pro nahrání souborů jde ovládat klávesnicí (`role="button"`, Enter a mezerník).
 - **Seznam projektů už neobsahuje fiktivní projekty z DevSuite importu.** Slugs použité jen pro záznamy pracovního deníku (akademiefnusa, fnusahpp) zakládaly prázdné archivované projekty; teď se mapují na NULL a záznam drží vazbu přes klienta. Slug dortemprotirakovine se řeší přes `folder_path` na reálný projekt `dortem-proti-rakovine-cz`. Na live DB opraveno: projekty Akademie FNUSA a Dortem proti rakovině (virtuální) smazány, jejich worklog záznamy přemapovány.
